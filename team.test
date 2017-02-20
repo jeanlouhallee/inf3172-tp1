@@ -1,0 +1,5 @@
+creation_repertoire /main
+creation_repertoire /main/a1
+creation_repertoire /main/a1/b1
+creation_repertoire /main/a1/b1/c1
+creation_fichier /main/a1/b1/c1/fichier1.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
