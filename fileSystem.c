@@ -47,16 +47,18 @@ void lireCheminAbsolu(FILE *operations, char *chemin){
 
     fscanf(operations, "/");
     while(fscanf(operations, "%s/", repertoire)){
-        //Verifie si le repertoire existe
-
         //Verifie si le chemin est trop long
         if((strlen(chemin) + strlen(repertoire)) <= 40){
             strcat(chemin, repertoire);
-            strcat(chemin, "/");
         } else {
             fprintf(stderr, "\n" );
             exit(EXIT_FAILURE);
         }
+
+        //Verifie si le repertoire existe
+
+
+        strcat(chemin, "/");
     }
 
     return;
@@ -76,7 +78,7 @@ void creationFicher(FILE *operations){
     // Verifie si le fichier existe deja
 
     // Lecture du contenu du fichier
-    fscanf(operations, "%[^\n]", );
+    //fscanf(operations, "%[^\n]", );
 
     // Verifie si le fichier est trop volumineux
 }
