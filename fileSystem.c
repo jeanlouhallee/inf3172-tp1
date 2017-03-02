@@ -30,14 +30,19 @@ int main(int argc, char *argv[]){
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier\0")){
+            printf("creation_fichier\n");
             creationFicher(operations, repertoires, blocs);
         } else if(strcmp(operation, "suppression_fichier\0")){
+            printf("suppression_fichier\n");
             suppressionFichier(operations, repertoires, blocs);
         } else if(strcmp(operation, "creation_repertoire\0")){
+            printf("creation_repertoire\n");
             creationRepertoire(operations, repertoires);
         } else if(strcmp(operation, "suppression_repertoire\0")){
+            printf("suppression_repertoire\n");
             suppressionRepertoire(operations, repertoires, blocs);
         } else if(strcmp(operation, "lire_fichier\0")){
+            printf("lire_fichier\n");
             lireFichier(operations, repertoires);
         } else {
             fprintf(stderr, "\n" );
@@ -64,7 +69,7 @@ void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
 
     while(fscanf(operations, "/%[^/]", repertoire)){
         strcat(chemin, "/");
-        verifierCheminAbsolu(strcat(chemin, repertoire));
+        verifierCheminAbsolu(strcat(chemin,(char*)repertoire));
 
         //Verifie si le repertoire existe
     }
@@ -123,7 +128,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
 
     // Verifie si le repertoire existe deja
 
-    verifierCheminAbsolu(strcat(chemin, repertoires));
+    verifierCheminAbsolu(strcat(chemin, (char*)repertoires));
 
     // Enregistre dans le fichier de repertoires
 }

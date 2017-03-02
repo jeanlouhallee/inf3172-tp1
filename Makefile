@@ -2,7 +2,8 @@ exe: fileSystem.o
 	gcc -o exe fileSystem.o
 	rm *.o
 fileSystem.o: fileSystem.c fileSystem.h
-	gcc -c fileSystem.c 
+	clear
+	gcc -c -Wall fileSystem.c 
 
 
 .PHONY: clean
