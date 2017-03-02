@@ -5,11 +5,18 @@
 #include <unistd.h>
 #include "fileSystem.h"
 
-#define MAX_CHEMIN 1000
+#define MAX_CHEMIN 250
 #define MAX_BLOC 16
 #define MAX_OPERATION 23
 #define MAX_CONTENU 250
 
+struct repertoire {
+    char chemin[41];
+};
+
+struct inode {
+
+};
 int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
     //char chemin[MAX_CHEMIN];
@@ -57,6 +64,9 @@ int main(int argc, char *argv[]){
     fclose(operations);
     fclose(disque);
     fclose(repertoires);
+    fclose(blocs);
+
+    return 0;
 }
 
 void verifierCheminAbsolu(char *chemin){
@@ -77,6 +87,7 @@ void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
     while(fscanf(operations, "/%[^/]", repertoire)){
         strcat(chemin, "/");
         verifierCheminAbsolu(strcat(chemin,(char*)repertoire));
+        printf("Test : %s\n", chemin);
 
         //Verifie si le repertoire existe
     }
@@ -140,7 +151,6 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
     // Verifie si le repertoire existe deja
 
     //***verifierCheminAbsolu(strcat(chemin, (char*)repertoires));
-    printf("Test chemin : %s\n", chemin);
     verifierCheminAbsolu(chemin);
 
     // Enregistre dans le fichier de repertoires
