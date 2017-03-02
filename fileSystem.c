@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include "fileSystem.h"
@@ -9,14 +10,10 @@
 #define MAX_BLOC 16
 #define MAX_OPERATION 23
 #define MAX_CONTENU 250
+#define FICHIER_DISQUE "disque"
+#define FICHIER_REPERTOIRES "repertoires"
+#define FICHIER_BLOCS "blocs"
 
-struct repertoire {
-    char chemin[41];
-};
-
-struct inode {
-
-};
 int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
     //char chemin[MAX_CHEMIN];
@@ -30,12 +27,12 @@ int main(int argc, char *argv[]){
 
     FILE *operations = fopen(argv[1], "r");
     // Fichier utilise pour le disque
-    FILE *disque = fopen("disque", "ab+");
+    FILE *disque = fopen(FICHIER_DISQUE, "ab+");
     ftruncate(fileno(disque), 512 * 1000);
     // Fichier contenant une liste des repertoires
-    FILE *repertoires = fopen("repertoires", "ab+");
+    FILE *repertoires = fopen(FICHIER_REPERTOIRES, "ab+");
     // Fichier contenant une liste des blocs libres
-    FILE *blocs = fopen("blocs", "ab+");
+    FILE *blocs = fopen(FICHIER_BLOCS, "ab+");
 
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
@@ -68,14 +65,31 @@ int main(int argc, char *argv[]){
 
     return 0;
 }
+bool fichierExisteDeja(char *chemin, FILE *repertoires,struct repertoire *r){
+    bool fichierExisteDeja = false;
+    struct repertoire buffer;
+    fseek(repertoires, 0, SEEK_SET);
+    while((fread(&buffer, sizeof(struct repertoire), 1, repertoires) != 0) && !fichierExisteDeja){
 
-void verifierCheminAbsolu(char *chemin){
+        if(strcmp(buffer.chemin, r->chemin) == 0){
+            fichierExisteDeja = true;
+            fprintf(stderr, "Fichier deja existant\n" );
+        }
+    }
+    return fichierExisteDeja;
+}
+
+bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires, struct repertoire *r){
+    bool estOk = true;
     if(strlen(chemin) > 40){
         fprintf(stderr, "Chemin trop long\n" );
-        exit(EXIT_FAILURE);
+        //exit(EXIT_FAILURE);
+        estOk = false;
+    }else if(fichierExisteDeja(chemin, repertoires, r)){
+        estOk = false;
     }
 
-    return;
+    return estOk;
 }
 
 void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
@@ -86,7 +100,7 @@ void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
     /**
     while(fscanf(operations, "/%[^/]", repertoire)){
         strcat(chemin, "/");
-        verifierCheminAbsolu(strcat(chemin,(char*)repertoire));
+        cheminAbsoluAcceptable(strcat(chemin,(char*)repertoire));
         printf("Test : %s\n", chemin);
 
         //Verifie si le repertoire existe
@@ -99,16 +113,23 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
     char nom[MAX_CHEMIN];
     char contenu[MAX_CONTENU];
+    struct repertoire *r = malloc(sizeof(struct repertoire));
 
     // Verifie si le disque est plein
 
     lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du fichier
+
+    // Lecture du contenu
     fscanf(operations, "%s", nom);
     fgets(contenu, MAX_CONTENU, operations);
     printf("%s", contenu);
-    verifierCheminAbsolu(chemin);
+    //if(cheminAbsoluAcceptable(chemin, repertoires, r)){
+
+
+    //    printf("on ecris!\n");
+    //}
 
     // Verifie si le fichier existe deja
 
@@ -124,6 +145,7 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
     // Enregistre le fichier sur le disque
 
     // Indique que les blocs sont utilises
+    free(r);
 }
 
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs){
@@ -142,16 +164,22 @@ void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs){
 
 void creationRepertoire(FILE *operations, FILE *repertoires){
     char chemin[MAX_CHEMIN];
+    struct repertoire *r = malloc(sizeof(struct repertoire));
     //char nom[MAX_CHEMIN];
 
     lireCheminAbsolu(operations, repertoires, chemin);
-
+    strcpy(r->chemin, chemin);
     // Lecture du nom du nouveau repertoire
 
     // Verifie si le repertoire existe deja
 
-    //***verifierCheminAbsolu(strcat(chemin, (char*)repertoires));
-    verifierCheminAbsolu(chemin);
+    //***cheminAbsoluAcceptable(strcat(chemin, (char*)repertoires));
+    if(cheminAbsoluAcceptable(chemin, repertoires, r)){
+        fseek(repertoires, 0, SEEK_END);
+        if(repertoires != NULL){
+            fwrite(r, sizeof(struct repertoire), 1, repertoires);
+        }
+    }
 
     // Enregistre dans le fichier de repertoires
 }
