@@ -73,7 +73,6 @@ bool fichierExisteDeja(char *chemin, FILE *repertoires,struct repertoire *r){
 
         if(strcmp(buffer.chemin, r->chemin) == 0){
             fichierExisteDeja = true;
-            fprintf(stderr, "Fichier deja existant\n" );
         }
     }
     return fichierExisteDeja;
@@ -83,13 +82,31 @@ bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires, struct repertoire *
     bool estOk = true;
     if(strlen(chemin) > 40){
         fprintf(stderr, "Chemin trop long\n" );
-        //exit(EXIT_FAILURE);
         estOk = false;
     }else if(fichierExisteDeja(chemin, repertoires, r)){
         estOk = false;
+        fprintf(stderr, "Fichier deja existant\n");
     }
 
     return estOk;
+}
+
+char* nomFichier(char chemin[]){
+    int i;
+    char *path = malloc(sizeof(char)*(strlen(chemin) + 2));
+
+    strcpy(path, chemin);
+    strcat(path, "\0");
+
+    i = strlen(path);
+    while(path[i] != '/'){
+        printf("%c\n", path[i]);
+        --i;
+    }
+    i = strlen(path) - i - 1;
+    char *nomFichier = (path + strlen(chemin)) - i;
+    free(path);
+    return nomFichier;
 }
 
 void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
@@ -111,20 +128,22 @@ void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
 
 void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
-    char nom[MAX_CHEMIN];
     char contenu[MAX_CONTENU];
     struct repertoire *r = malloc(sizeof(struct repertoire));
 
     // Verifie si le disque est plein
 
     lireCheminAbsolu(operations, repertoires, chemin);
-
+    strcpy(r->chemin, chemin);
     // Lecture du nom du fichier
 
     // Lecture du contenu
-    fscanf(operations, "%s", nom);
+    //fscanf(operations, "%s", nom);
+    fseek(operations, 1, SEEK_CUR);
     fgets(contenu, MAX_CONTENU, operations);
-    printf("%s", contenu);
+    printf("%s\n", contenu);
+    char *nom = nomFichier(chemin);
+    printf("Nom du fichier: %s\n\n", nom);
     //if(cheminAbsoluAcceptable(chemin, repertoires, r)){
 
 

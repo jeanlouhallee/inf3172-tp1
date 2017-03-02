@@ -3,7 +3,7 @@ struct repertoire {
 };
 
 struct inode {
-
+    int id;
 };
 
 void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs);
@@ -21,3 +21,5 @@ bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires, struct repertoire *
 void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin);
 
 bool fichierExisteDeja(char *chemin, FILE *repertoires, struct repertoire *r);
+
+char* nomFichier(char *chemin);
