@@ -9,3 +9,6 @@ fileSystem.o: fileSystem.c fileSystem.h
 
 clean:
 		rm exe
+		rm disque
+		rm blocs
+		rm repertoires

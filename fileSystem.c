@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
     FILE *blocs = fopen("blocs", "ab+");
 
     // Lecture des operations
-    while(fscanf(operations, "%s", operation) != EOF){        
+    while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier\0")){
             creationFicher(operations, repertoires, blocs);
         } else if(strcmp(operation, "suppression_fichier\0")){
@@ -102,7 +102,7 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du fichier
 
@@ -117,13 +117,13 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
     char chemin[MAX_CHEMIN];
     char nom[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du nouveau repertoire
 
     // Verifie si le repertoire existe deja
 
-    verifierCheminAbsolu(strcat(chemin, repertoire));
+    verifierCheminAbsolu(strcat(chemin, repertoires));
 
     // Enregistre dans le fichier de repertoires
 }
@@ -131,7 +131,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
 void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du repertoire
 
@@ -145,7 +145,7 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *blocs){
 void lireFichier(FILE *operations, FILE *repertoires){
     char chemin[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du fichier
 
