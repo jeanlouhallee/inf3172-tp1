@@ -9,13 +9,16 @@
 #define MAX_BLOC 16
 
 int main(int argc, char *argv[]){
+    char operation[23];
+    //char chemin[MAX_CHEMIN];
+    //char donnees[1000];
     // Fichier d'operations donne en parametre
     if(argc != 2){
         fprintf(stderr, "\n" );
         return EXIT_FAILURE;
     }
     FILE *operations = fopen(argv[1], "r");
-    char operation[23];
+
 
     // Fichier utilise pour le disque
     FILE *disque = fopen("disque", "ab+");
@@ -28,7 +31,9 @@ int main(int argc, char *argv[]){
     FILE *blocs = fopen("blocs", "ab+");
 
     // Lecture des operations
-    while(fscanf(operations, "%s", operation) != EOF){
+    /**
+    while(fscanf(operations,"%s %s %s", operation, chemin, donnees) != EOF){
+        printf("%s %s %s\n", operation, chemin, donnees);
         if(strcmp(operation, "creation_fichier\0")){
             printf("creation_fichier\n");
             creationFicher(operations, repertoires, blocs);
@@ -46,9 +51,34 @@ int main(int argc, char *argv[]){
             lireFichier(operations, repertoires);
         } else {
             fprintf(stderr, "\n" );
+          return EXIT_FAILURE;
+        }
+
+    }
+    **/
+
+    while(fscanf(operations, "%s", operation) != EOF){
+        if(strcmp(operation, "creation_fichier")  == 0){
+            printf("creation de fichier\n");
+            creationFicher(operations, repertoires, blocs);
+        } else if(strcmp(operation, "suppression_fichier\0") == 0){
+            printf("suppression de fichier\n");
+            suppressionFichier(operations, repertoires, blocs);
+        } else if(strcmp(operation, "creation_repertoire") == 0){
+            printf("creation de repertoire\n");
+            creationRepertoire(operations, repertoires);
+        } else if(strcmp(operation, "suppression_repertoire\0") == 0){
+            printf("suppression de repertoire\n");
+            suppressionRepertoire(operations, repertoires, blocs);
+        } else if(strcmp(operation, "lire_fichier\0") == 0){
+            printf("lire de fichier\n");
+            lireFichier(operations, repertoires);
+        } else {
+            fprintf(stderr, "\n" );
             return EXIT_FAILURE;
         }
     }
+
 
     fclose(operations);
     fclose(disque);
@@ -67,19 +97,23 @@ void verifierCheminAbsolu(char *chemin){
 void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
     char repertoire[MAX_CHEMIN];
 
+    fscanf(operations, "%s", repertoire);
+    printf("X %s\n X", repertoire);
+    /**
     while(fscanf(operations, "/%[^/]", repertoire)){
         strcat(chemin, "/");
         verifierCheminAbsolu(strcat(chemin,(char*)repertoire));
 
         //Verifie si le repertoire existe
     }
-
+    **/
     return;
 }
 
 void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
-    char chemin[MAX_CHEMIN] = "";
+    char chemin[MAX_CHEMIN];
     char nom[MAX_CHEMIN];
+    char contenu[1000];
 
     // Verifie si le disque est plein
 
@@ -87,6 +121,9 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
 
     // Lecture du nom du fichier
     fscanf(operations, "%s", nom);
+    fgets(contenu, 1000, operations);
+    printf("%s", contenu);
+
 
     // Verifie si le fichier existe deja
 
@@ -120,7 +157,7 @@ void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs){
 
 void creationRepertoire(FILE *operations, FILE *repertoires){
     char chemin[MAX_CHEMIN];
-    char nom[MAX_CHEMIN];
+    //char nom[MAX_CHEMIN];
 
     lireCheminAbsolu(operations, repertoires, chemin);
 
