@@ -1,9 +1,13 @@
-void creationFicher();
+void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs);
 
-void suppressionFichier();
+void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs);
 
-void creationRepertoire();
+void creationRepertoire(FILE *operations, FILE *repertoires);
 
-void suppressionRepertoire();
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *blocs);
 
-void lireFichier();
+void lireFichier(FILE *operations, FILE *repertoires);
+
+void verifierCheminAbsolu(char *chemin);
+
+void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin);

@@ -5,42 +5,47 @@
 #include <unistd.h>
 #include "fileSystem.h"
 
-#define MAX_CHEMIN 41
+#define MAX_CHEMIN 1000
 #define MAX_BLOC 16
+#define MAX_OPERATION 23
+#define MAX_CONTENU 250
 
 int main(int argc, char *argv[]){
+    char operation[MAX_OPERATION];
+    //char chemin[MAX_CHEMIN];
+    //char donnees[1000];
+
     // Fichier d'operations donne en parametre
     if(argc != 2){
         fprintf(stderr, "\n" );
         return EXIT_FAILURE;
     }
-    FILE *operations = fopen(argv[1], "r");
-    char operation[23];
 
+    FILE *operations = fopen(argv[1], "r");
     // Fichier utilise pour le disque
     FILE *disque = fopen("disque", "ab+");
     ftruncate(fileno(disque), 512 * 1000);
-
     // Fichier contenant une liste des repertoires
     FILE *repertoires = fopen("repertoires", "ab+");
-
-    // Fichier contenant les i-nodes
-    FILE *inodes = fopen("inodes", "ab+");
-
     // Fichier contenant une liste des blocs libres
     FILE *blocs = fopen("blocs", "ab+");
 
     // Lecture des operations
-    while(fscanf(operations, "%s", operation) != EOF){        
-        if(strcmp(operation, "creation_fichier\0")){
-            creationFicher(operations, repertoires, inodes, blocs);
-        } else if(strcmp(operation, "suppression_fichier\0")){
-            suppressionFichier(operations, repertoires, inodes, blocs);
-        } else if(strcmp(operation, "creation_repertoire\0")){
+    while(fscanf(operations, "%s", operation) != EOF){
+        if(strcmp(operation, "creation_fichier")  == 0){
+            printf("creation de fichier\n");
+            creationFicher(operations, repertoires, blocs);
+        } else if(strcmp(operation, "suppression_fichier\0") == 0){
+            printf("suppression de fichier\n");
+            suppressionFichier(operations, repertoires, blocs);
+        } else if(strcmp(operation, "creation_repertoire") == 0){
+            printf("creation de repertoire\n");
             creationRepertoire(operations, repertoires);
-        } else if(strcmp(operation, "suppression_repertoire\0")){
-            suppressionRepertoire(operations, repertoires, inodes, blocs);
-        } else if(strcmp(operation, "lire_fichier\0")){
+        } else if(strcmp(operation, "suppression_repertoire\0") == 0){
+            printf("suppression de repertoire\n");
+            suppressionRepertoire(operations, repertoires, blocs);
+        } else if(strcmp(operation, "lire_fichier\0") == 0){
+            printf("lire de fichier\n");
             lireFichier(operations, repertoires);
         } else {
             fprintf(stderr, "\n" );
@@ -48,16 +53,15 @@ int main(int argc, char *argv[]){
         }
     }
 
+
     fclose(operations);
     fclose(disque);
     fclose(repertoires);
-    fclose(inodes);
-    fclose(blocs);
 }
 
 void verifierCheminAbsolu(char *chemin){
     if(strlen(chemin) > 40){
-        fprintf(stderr, "\n" );
+        fprintf(stderr, "Chemin trop long\n" );
         exit(EXIT_FAILURE);
     }
 
@@ -65,21 +69,25 @@ void verifierCheminAbsolu(char *chemin){
 }
 
 void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
-    char repertoire[MAX_CHEMIN];
+    //char repertoire[MAX_CHEMIN];
 
+    fscanf(operations, "%s", chemin);
+    printf("%s\n", chemin);
+    /**
     while(fscanf(operations, "/%[^/]", repertoire)){
         strcat(chemin, "/");
-        verifierCheminAbsolu(strcat(chemin, repertoire));
+        verifierCheminAbsolu(strcat(chemin,(char*)repertoire));
 
         //Verifie si le repertoire existe
     }
-
+    **/
     return;
 }
 
-void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
-    char chemin[MAX_CHEMIN] = "";
+void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
+    char chemin[MAX_CHEMIN];
     char nom[MAX_CHEMIN];
+    char contenu[MAX_CONTENU];
 
     // Verifie si le disque est plein
 
@@ -87,6 +95,9 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blo
 
     // Lecture du nom du fichier
     fscanf(operations, "%s", nom);
+    fgets(contenu, MAX_CONTENU, operations);
+    printf("%s", contenu);
+    verifierCheminAbsolu(chemin);
 
     // Verifie si le fichier existe deja
 
@@ -104,10 +115,10 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blo
     // Indique que les blocs sont utilises
 }
 
-void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
+void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du fichier
 
@@ -120,23 +131,25 @@ void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE 
 
 void creationRepertoire(FILE *operations, FILE *repertoires){
     char chemin[MAX_CHEMIN];
-    char nom[MAX_CHEMIN];
+    //char nom[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du nouveau repertoire
 
     // Verifie si le repertoire existe deja
 
-    verifierCheminAbsolu(strcat(chemin, repertoire));
+    //***verifierCheminAbsolu(strcat(chemin, (char*)repertoires));
+    printf("Test chemin : %s\n", chemin);
+    verifierCheminAbsolu(chemin);
 
     // Enregistre dans le fichier de repertoires
 }
 
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du repertoire
 
@@ -150,7 +163,7 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FI
 void lireFichier(FILE *operations, FILE *repertoires){
     char chemin[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin);
 
     // Lecture du nom du fichier
 
