@@ -91,49 +91,55 @@ bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires, struct repertoire *
     return estOk;
 }
 
-char* nomFichier(char chemin[]){
-    int i;
-    char *path = malloc(sizeof(char)*(strlen(chemin) + 2));
+// char* nomFichier(char chemin[]){
+//     int i;
+//     char *path = malloc(sizeof(char)*(strlen(chemin) + 2));
 
-    strcpy(path, chemin);
-    strcat(path, "\0");
+//     strcpy(path, chemin);
+//     strcat(path, "\0");
 
-    i = strlen(path);
-    while(path[i] != '/'){
-        printf("%c\n", path[i]);
-        --i;
-    }
-    i = strlen(path) - i - 1;
-    char *nomFichier = (path + strlen(chemin)) - i;
-    free(path);
-    return nomFichier;
-}
+//     i = strlen(path);
+//     while(path[i] != '/'){
+//         printf("%c\n", path[i]);
+//         --i;
+//     }
+//     i = strlen(path) - i - 1;
+//     char *nomFichier = (path + strlen(chemin)) - i;
+//     free(path);
+//     return nomFichier;
+// }
 
-void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin){
-    //char repertoire[MAX_CHEMIN];
+void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin, char *nom){
+    char cheminComplet[MAX_CHEMIN];
+    char *ptrNom;
+    int longueurChemin;
 
-    fscanf(operations, "%s", chemin);
-    printf("%s\n", chemin);
-    /**
-    while(fscanf(operations, "/%[^/]", repertoire)){
-        strcat(chemin, "/");
-        cheminAbsoluAcceptable(strcat(chemin,(char*)repertoire));
-        printf("Test : %s\n", chemin);
+    fscanf(operations, "%s", cheminComplet);
+    printf("Chemin : %s\n", cheminComplet);
 
-        //Verifie si le repertoire existe
-    }
-    **/
+    ptrNom = strrchr(cheminComplet, '/') + 1;
+    nom = malloc(sizeof(char) * strlen(ptrNom) + 2);
+    strcpy(nom, ptrNom);
+    printf("Nom : %s\n", nom);
+
+    longueurChemin = strlen(cheminComplet) - strlen(nom);
+    strncpy(chemin, cheminComplet, longueurChemin);
+    chemin[longueurChemin] = '\0';
+    printf("Chemin absolu : %s\n", chemin);
+
     return;
 }
 
 void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
     char contenu[MAX_CONTENU];
+    char *nom;
     struct repertoire *r = malloc(sizeof(struct repertoire));
 
     // Verifie si le disque est plein
 
-    lireCheminAbsolu(operations, repertoires, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin, nom);
+    strcat(chemin, nom);
     strcpy(r->chemin, chemin);
     // Lecture du nom du fichier
 
@@ -142,8 +148,8 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
     fseek(operations, 1, SEEK_CUR);
     fgets(contenu, MAX_CONTENU, operations);
     printf("%s\n", contenu);
-    char *nom = nomFichier(chemin);
-    printf("Nom du fichier: %s\n\n", nom);
+    // char *nom = nomFichier(chemin);
+    // printf("Nom du fichier: %s\n\n", nom);
     //if(cheminAbsoluAcceptable(chemin, repertoires, r)){
 
 
@@ -169,8 +175,9 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs){
 
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
+    char *nom;
 
-    lireCheminAbsolu(operations, repertoires, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin, nom);
 
     // Lecture du nom du fichier
 
@@ -184,9 +191,10 @@ void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs){
 void creationRepertoire(FILE *operations, FILE *repertoires){
     char chemin[MAX_CHEMIN];
     struct repertoire *r = malloc(sizeof(struct repertoire));
+    char *nom;
     //char nom[MAX_CHEMIN];
 
-    lireCheminAbsolu(operations, repertoires, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin, nom);
     strcpy(r->chemin, chemin);
     // Lecture du nom du nouveau repertoire
 
@@ -205,8 +213,9 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
 
 void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *blocs){
     char chemin[MAX_CHEMIN];
+    char *nom;
 
-    lireCheminAbsolu(operations, repertoires, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin, nom);
 
     // Lecture du nom du repertoire
 
@@ -219,8 +228,9 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *blocs){
 
 void lireFichier(FILE *operations, FILE *repertoires){
     char chemin[MAX_CHEMIN];
+    char *nom;
 
-    lireCheminAbsolu(operations, repertoires, chemin);
+    lireCheminAbsolu(operations, repertoires, chemin, nom);
 
     // Lecture du nom du fichier
 

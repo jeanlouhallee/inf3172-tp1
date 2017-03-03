@@ -18,7 +18,7 @@ void lireFichier(FILE *operations, FILE *repertoires);
 
 bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires, struct repertoire *r);
 
-void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin);
+void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin, char *nom);
 
 bool fichierExisteDeja(char *chemin, FILE *repertoires, struct repertoire *r);
 
