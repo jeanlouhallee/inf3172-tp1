@@ -9,7 +9,8 @@ fileSystem.o: fileSystem.c fileSystem.h
 .PHONY: clean
 
 clean:
-		rm exe
-		rm disque
-		rm blocs
-		rm repertoires
+		rm -f exe
+		rm -f disque
+		rm -f blocs
+		rm -f repertoires
+		clear
