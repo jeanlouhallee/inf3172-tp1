@@ -4,22 +4,26 @@ struct repertoire {
 
 struct inode {
     int id;
+    char nom[41];
+    char repertoire[41];
 };
 
-void creationFicher(FILE *operations, FILE *repertoires, FILE *blocs);
+void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);
 
-void suppressionFichier(FILE *operations, FILE *repertoires, FILE *blocs);
+void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);
 
 void creationRepertoire(FILE *operations, FILE *repertoires);
 
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *blocs);
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);
 
-void lireFichier(FILE *operations, FILE *repertoires);
+void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes);
 
-bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires, struct repertoire *r);
+bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires);
 
-void lireCheminAbsolu(FILE *operations, FILE *repertoires, char *chemin, char *nom);
+void lireChemin(FILE *operations, FILE *repertoires, char *chemin, char *nom);
 
-bool fichierExisteDeja(char *chemin, FILE *repertoires, struct repertoire *r);
+bool fichierExiste(char *chemin, FILE *inodes);
 
-char* nomFichier(char *chemin);
+bool repertoireExiste(char *chemin, FILE *repertoires);
+
+// char* nomFichier(char *chemin);
