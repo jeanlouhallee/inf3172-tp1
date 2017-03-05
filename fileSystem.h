@@ -5,7 +5,6 @@ struct repertoire {
 struct inode {
     int id;
     char nom[41];
-    char repertoire[41];
 };
 
 void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);

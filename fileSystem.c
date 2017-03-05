@@ -36,6 +36,12 @@ int main(int argc, char *argv[]){
     // Fichier contenant une liste des blocs libres
     FILE *blocs = fopen(FICHIER_BLOCS, "ab+");
 
+    // Creation du repertoire racine
+    struct repertoire *r = malloc(sizeof(struct repertoire));
+    strcpy(r->chemin, "/\0");
+    fseek(repertoires, 0, SEEK_SET);
+    fwrite(r, sizeof(struct repertoire), 1, repertoires);
+
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier")  == 0){
@@ -109,11 +115,15 @@ void lireNom(char *nom, char *chemin){
 }
 
 void lireRepertoireParent(char *parent, char *chemin, char *nom){
-    int longueurChemin;
+    int longueur;
 
-    longueurChemin = strlen(chemin) - strlen(nom);
-    strncpy(parent, chemin, longueurChemin);
-    parent[longueurChemin] = '\0';
+    longueur = strlen(chemin) - strlen(nom) - 1;
+    if(longueur == 0){
+        strcpy(parent, "/\0");
+    } else {
+        strncpy(parent, chemin, longueur);
+        parent[longueur] = '\0';
+    }
     printf("Repertoire parent : %s\n", parent);
 
     return;
@@ -121,13 +131,13 @@ void lireRepertoireParent(char *parent, char *chemin, char *nom){
 
 bool repertoireParentExiste(char *chemin, FILE *repertoires){
     bool existeDeja = false;
-    char cheminParent[MAX_CHEMIN];
+    char repertoireParent[MAX_CHEMIN];
     char nom[MAX_CHEMIN];
 
     lireNom(nom, chemin);
-    lireRepertoireParent(cheminParent, chemin, nom);
+    lireRepertoireParent(repertoireParent, chemin, nom);
 
-    existeDeja = repertoireExiste(cheminParent, repertoires);
+    existeDeja = repertoireExiste(repertoireParent, repertoires);
 
     return existeDeja;
 }
@@ -165,14 +175,15 @@ void lireChemin(FILE *operations, char *chemin){
 void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
     char nom[MAX_CHEMIN];
     char contenu[MAX_CONTENU];
-    // struct repertoire *r = malloc(sizeof(struct repertoire));
     struct inode *i = malloc(sizeof(struct inode));
 
     // Verifie si le disque est plein
 
     lireChemin(operations, nom);
 
-    // strcpy(r->chemin, chemin);
+    // Verifie si le fichier existe deja
+
+    strcpy(i->nom, nom);
 
     // Lecture du contenu
     //fscanf(operations, "%s", nom);
@@ -186,11 +197,6 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blo
 
     //    printf("on ecris!\n");
     //}
-
-    // Verifie si le fichier existe deja
-
-    // Lecture du contenu du fichier
-    //fscanf(operations, "%[^\n]", );
 
     // Verifie si le fichier est trop volumineux
 
@@ -240,7 +246,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
         }
     } else {
         fprintf(stderr, "Le repertoire parent n'existe pas\n" );
-        exit(EXIT_FAILURE);
+        //exit(EXIT_FAILURE);
     }
 
 }
