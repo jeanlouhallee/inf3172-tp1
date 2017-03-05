@@ -20,7 +20,11 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes);
 
 bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires);
 
-void lireChemin(FILE *operations, FILE *repertoires, char *chemin, char *nom);
+void lireChemin(FILE *operations, char *chemin);
+
+void lireRepertoireParent(char *parent, char *chemin, char *nom);
+
+bool repertoireParentExiste(char *chemin, FILE *repertoires);
 
 bool fichierExiste(char *chemin, FILE *inodes);
 
