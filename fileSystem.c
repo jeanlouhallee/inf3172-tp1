@@ -59,7 +59,7 @@ int main(int argc, char *argv[]){
             return EXIT_FAILURE;
         }
     }
-
+#
 
     fclose(operations);
     fclose(disque);
@@ -77,6 +77,7 @@ bool fichierExiste(char *nom, FILE *inodes){
     while((fread(&buffer, sizeof(struct inode), 1, inodes) != 0) && !existeDeja){
 
         if(strcmp(buffer.nom, nom) == 0){
+            fprintf(stderr, "Fichier existe deja.\n" );
             existeDeja = true;
         }
     }
@@ -91,7 +92,9 @@ bool repertoireExiste(char *chemin, FILE *repertoires){
     while((fread(&buffer, sizeof(struct repertoire), 1, repertoires) != 0) && !existeDeja){
 
         if(strcmp(buffer.chemin, chemin) == 0){
+            fprintf(stderr, "Repertoire existe deja.\n" );
             existeDeja = true;
+
         }
     }
     return existeDeja;
@@ -207,7 +210,7 @@ void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE 
         // Libere les blocs du fichier
 
         // Supprime l'i-node du fichier
-        
+
     } else {
         fprintf(stderr, "Le fichier n'existe pas\n" );
         exit(EXIT_FAILURE);
@@ -225,7 +228,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
     strcat(chemin, nom);
     strcpy(r->chemin, chemin);
 
-    if(repertoireExiste(chemin, repertoires)){
+    if(!repertoireExiste(chemin, repertoires)){
         fseek(repertoires, 0, SEEK_END);
         if(repertoires != NULL){
             fwrite(r, sizeof(struct repertoire), 1, repertoires);
