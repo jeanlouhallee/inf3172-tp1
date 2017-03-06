@@ -29,4 +29,4 @@ bool fichierExiste(char *chemin, FILE *inodes);
 
 bool repertoireExiste(char *chemin, FILE *repertoires);
 
-// char* nomFichier(char *chemin);
+void lireContenu(FILE *operations, char *contenu);
