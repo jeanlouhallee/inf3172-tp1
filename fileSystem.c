@@ -6,10 +6,10 @@
 #include <unistd.h>
 #include "fileSystem.h"
 
-#define MAX_CHEMIN 250 // 41 ??
+#define MAX_CHEMIN 41
 #define MAX_BLOCS 16
 #define MAX_OPERATION 23
-#define MAX_CONTENU 256 // 250 ??
+#define MAX_CONTENU 256
 #define FICHIER_DISQUE "disque"
 #define FICHIER_REPERTOIRES "repertoires"
 #define FICHIER_INODES "inodes"
@@ -17,7 +17,6 @@
 
 int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
-    //char donnees[1000];
 
     if(argc != 2){
         fprintf(stderr, "Nom de fichier manquant ou arguments en trop\n" );
@@ -37,10 +36,13 @@ int main(int argc, char *argv[]){
     FILE *blocs = fopen(FICHIER_BLOCS, "ab+");
 
     // Creation du repertoire racine
-    struct repertoire *r = malloc(sizeof(struct repertoire));
-    strcpy(r->chemin, "/\0");
-    fseek(repertoires, 0, SEEK_SET);
-    fwrite(r, sizeof(struct repertoire), 1, repertoires);
+    fseek(repertoires, 0, SEEK_END);
+    if(ftell(repertoires) == 0){
+        struct repertoire *r = malloc(sizeof(struct repertoire));
+        strcpy(r->chemin, "/\0");
+        fseek(repertoires, 0, SEEK_SET);
+        fwrite(r, sizeof(struct repertoire), 1, repertoires);
+    }
 
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
@@ -82,7 +84,6 @@ bool fichierExiste(char *nom, FILE *inodes){
     while((fread(&buffer, sizeof(struct inode), 1, inodes) != 0) && !existe){
 
         if(strcmp(buffer.nom, nom) == 0){
-            fprintf(stderr, "Fichier existe deja.\n" );
             existe = true;
         }
     }
@@ -97,7 +98,6 @@ bool repertoireExiste(char *chemin, FILE *repertoires){
     while((fread(&buffer, sizeof(struct repertoire), 1, repertoires) != 0) && !existe){
 
         if(strcmp(buffer.chemin, chemin) == 0){
-            fprintf(stderr, "Repertoire existe deja.\n" );
             existe = true;
 
         }
@@ -131,166 +131,149 @@ void lireRepertoireParent(char *parent, char *chemin, char *nom){
 }
 
 bool repertoireParentExiste(char *chemin, FILE *repertoires){
-    bool existeDeja = false;
-    char repertoireParent[MAX_CHEMIN];
-    char nom[MAX_CHEMIN];
+    bool existe = false;
+    char repertoireParent[MAX_CHEMIN + 1];
+    char nom[MAX_CHEMIN + 1];
 
     lireNom(nom, chemin);
     lireRepertoireParent(repertoireParent, chemin, nom);
 
-    existeDeja = repertoireExiste(repertoireParent, repertoires);
+    existe = repertoireExiste(repertoireParent, repertoires);
 
-    return existeDeja;
+    return existe;
 }
 
-// char* nomFichier(char chemin[]){
-//     int i;
-//     char *path = malloc(sizeof(char)*(strlen(chemin) + 2));
+bool lireChemin(FILE *operations, char *chemin){
+    bool estOK = true;
 
-//     strcpy(path, chemin);
-//     strcat(path, "\0");
-
-//     i = strlen(path);
-//     while(path[i] != '/'){
-//         printf("%c\n", path[i]);
-//         --i;
-//     }
-//     i = strlen(path) - i - 1;
-//     char *nomFichier = (path + strlen(chemin)) - i;
-//     free(path);
-//     return nomFichier;
-// }
-
-void lireChemin(FILE *operations, char *chemin){
-
-    fscanf(operations, "%s", chemin);
+    fscanf(operations, "%41s", chemin);
     printf("Chemin : %s\n", chemin);
 
-    if(strlen(chemin) > 40){
-        fprintf(stderr, "Chemin absolu trop long\n" );
-        exit(EXIT_FAILURE);
+    if(strlen(chemin) >= MAX_CHEMIN){
+        fprintf(stderr, "Chemin absolu trop long\n");
+        return estOK = false;
     }
 
-    return;
+    return estOK;
 }
 
-void lireContenu(FILE *operations, char *contenu){
-    
-    fseek(operations, 1, SEEK_CUR);
-    fgets(contenu, MAX_CONTENU, operations);
+bool lireContenu(FILE *operations, char *contenu){
+    bool estOK = true;
 
-    if(strlen(contenu) > 256){
-        fprintf(stderr, "Contenu du fichier trop long\n" );
-        exit(EXIT_FAILURE);
+    fseek(operations, 1, SEEK_CUR);
+    fgets(contenu, MAX_CONTENU + 1, operations);
+
+    if(strlen(contenu) >= MAX_CONTENU){
+        fprintf(stderr, "Contenu du fichier trop long\n");
+        return estOK = false;
     } else if(strlen(contenu) == 0){
-        fprintf(stderr, "Le fichier ne peut pas etre vide\n" );
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Le fichier ne peut pas etre vide\n");
+        return estOK = false;
     }
     printf("Contenu : %s\n", contenu);
 
-    return;
+    return estOK;
 }
 
 void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
-    char nom[MAX_CHEMIN];
-    char contenu[MAX_CONTENU];
+    char nom[MAX_CHEMIN + 1];
+    char contenu[MAX_CONTENU + 1];
     struct inode *i = malloc(sizeof(struct inode));
 
     // Verifie si le disque est plein
 
-    lireChemin(operations, nom);
+    if(lireChemin(operations, nom)){
+        if(!fichierExiste(nom, inodes)){
+            if(repertoireParentExiste(nom, repertoires)){
+                if(lireContenu(operations, contenu)){
+                    strcpy(i->nom, nom);
 
-    if(!fichierExiste(nom, inodes)){
-        if(repertoireParentExiste(nom, repertoires)){
-            strcpy(i->nom, nom);
+                    // Verifie s'il reste assez d'espace sur le disque
 
-            lireContenu(operations, contenu);
-            
-            // Verifie s'il reste assez d'espace sur le disque
+                    // Cree un i-node pour le fichier
 
-            // Cree un i-node pour le fichier
+                    // Enregistre le fichier sur le disque
 
-            // Enregistre le fichier sur le disque
-
-            // Indique que les blocs sont utilises
-
+                    // Indique que les blocs sont utilises
+                }
+            } else {
+            fprintf(stderr, "Le repertoire n'existe pas\n");
+            //exit(EXIT_FAILURE);
+            }
         } else {
-        fprintf(stderr, "Le repertoire n'existe pas\n" );
-        exit(EXIT_FAILURE);
+            fprintf(stderr, "Le fichier existe deja\n");
+            //exit(EXIT_FAILURE);
         }
-    } else {
-        fprintf(stderr, "Le fichier existe deja\n" );
-        exit(EXIT_FAILURE);
     }
 }
 
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
-    char nom[MAX_CHEMIN];
+    char nom[MAX_CHEMIN + 1];
 
-    lireChemin(operations, nom);
+    if(lireChemin(operations, nom)){
+        if(fichierExiste(nom, inodes)){
+            // Libere les blocs du fichier
 
-    if(fichierExiste(nom, inodes)){
-        // Libere les blocs du fichier
+            // Supprime l'i-node du fichier
 
-        // Supprime l'i-node du fichier
-
-    } else {
-        fprintf(stderr, "Le fichier n'existe pas\n" );
-        exit(EXIT_FAILURE);
+        } else {
+            fprintf(stderr, "Le fichier n'existe pas\n");
+            //exit(EXIT_FAILURE);
+        }
     }
 
 }
 
 void creationRepertoire(FILE *operations, FILE *repertoires){
-    char chemin[MAX_CHEMIN];
+    char chemin[MAX_CHEMIN + 1];
     struct repertoire *r = malloc(sizeof(struct repertoire));
 
-    lireChemin(operations, chemin);
-
-    if(repertoireParentExiste(chemin, repertoires)){
-        if(!repertoireExiste(chemin, repertoires)){
-            strcpy(r->chemin, chemin);
-            fseek(repertoires, 0, SEEK_END);
-            fwrite(r, sizeof(struct repertoire), 1, repertoires);
+    if(lireChemin(operations, chemin)){
+        if(repertoireParentExiste(chemin, repertoires)){
+            if(!repertoireExiste(chemin, repertoires)){
+                strcpy(r->chemin, chemin);
+                fseek(repertoires, 0, SEEK_END);
+                fwrite(r, sizeof(struct repertoire), 1, repertoires);
+            } else {
+                fprintf(stderr, "Le repertoire existe deja\n");
+                //exit(EXIT_FAILURE);
+            }
         } else {
-            fprintf(stderr, "Le repertoire existe deja\n" );
-            exit(EXIT_FAILURE);
+            fprintf(stderr, "Le repertoire parent n'existe pas\n");
+            //exit(EXIT_FAILURE);
         }
-    } else {
-        fprintf(stderr, "Le repertoire parent n'existe pas\n" );
-        exit(EXIT_FAILURE);
     }
 
 }
 
 void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
-    char chemin[MAX_CHEMIN];
+    char chemin[MAX_CHEMIN + 1];
 
-    lireChemin(operations, chemin);
+    if(lireChemin(operations, chemin)){
+        if(repertoireExiste(chemin, repertoires)){
+            // Supprimer son contenu
 
-    if(repertoireExiste(chemin, repertoires)){
-        // Supprimer son contenu
+            // Supprime le repertoire du fichier de repertoires
 
-        // Supprime le repertoire du fichier de repertoires
-
-    } else {
-        fprintf(stderr, "Le repertoire n'existe pas\n" );
-        exit(EXIT_FAILURE);
+        } else {
+            fprintf(stderr, "Le repertoire n'existe pas\n");
+            //exit(EXIT_FAILURE);
+        }
     }
 
 }
 
 void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes){
-    char nom[MAX_CHEMIN];
+    char nom[MAX_CHEMIN + 1];
 
-    lireChemin(operations, nom);
+    if(lireChemin(operations, nom)){
+        if(fichierExiste(nom, inodes)){
+            // Affichage du contenu des blocs associes
 
-    if(fichierExiste(nom, inodes)){
-        // Affichage du contenu des blocs associes
-
-    } else {
-        fprintf(stderr, "Le fichier n'existe pas\n" );
-        exit(EXIT_FAILURE);
+        } else {
+            fprintf(stderr, "Le fichier n'existe pas\n");
+            //exit(EXIT_FAILURE);
+        }
     }
 
 }

@@ -1,10 +1,12 @@
 struct repertoire {
-    char chemin[41];
+    char chemin[42];
 };
 
 struct inode {
     int id;
-    char nom[41];
+    char nom[42];
+    int blocs[8];
+
 };
 
 void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);
@@ -19,7 +21,9 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes);
 
 bool cheminAbsoluAcceptable(char *chemin, FILE *repertoires);
 
-void lireChemin(FILE *operations, char *chemin);
+bool lireChemin(FILE *operations, char *chemin);
+
+bool lireContenu(FILE *operations, char *contenu);
 
 void lireRepertoireParent(char *parent, char *chemin, char *nom);
 
@@ -28,5 +32,3 @@ bool repertoireParentExiste(char *chemin, FILE *repertoires);
 bool fichierExiste(char *chemin, FILE *inodes);
 
 bool repertoireExiste(char *chemin, FILE *repertoires);
-
-void lireContenu(FILE *operations, char *contenu);
