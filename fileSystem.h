@@ -14,13 +14,13 @@ struct indirection {
     int blocs[8];
 };
 
-void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);
+void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes);
 
-void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);
+void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes);
 
 void creationRepertoire(FILE *operations, FILE *repertoires);
 
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes);
 
 void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes);
 

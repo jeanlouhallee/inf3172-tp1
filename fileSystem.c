@@ -20,7 +20,7 @@ int main(int argc, char *argv[]){
     int tab[1000] = {0};
 
     //SetBit(tab, 24355);
-    //printf("%d\n", TestBit(tab, 24355));
+
     if(argc != 2){
         fprintf(stderr, "Nom de fichier manquant ou arguments en trop\n" );
         return EXIT_FAILURE;
@@ -36,9 +36,10 @@ int main(int argc, char *argv[]){
     // Fichier contenant les i-nodes
     FILE *inodes = fopen(FICHIER_INODES, "ab+");
     // Fichier contenant une liste des blocs libres
-    FILE *blocs = fopen(FICHIER_BLOCS, "ab+");
+    FILE *blocsCharge = fopen(FICHIER_BLOCS, "ab+");
 
-    chargerTableBits(tab, blocs);
+    chargerTableBits(tab, blocsCharge);
+    fclose(blocsCharge);
     printf("%d\n", TestBit(tab, 24355));
     // Creation du repertoire racine
     fseek(repertoires, 0, SEEK_END);
@@ -48,21 +49,22 @@ int main(int argc, char *argv[]){
         fseek(repertoires, 0, SEEK_SET);
         fwrite(r, sizeof(struct repertoire), 1, repertoires);
     }
-
+    FILE *blocsSauve = fopen(FICHIER_BLOCS, "wb");
+    sauvegarderTableBits(tab, blocsSauve);
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier")  == 0){
             printf("creation de fichier\n");
-            creationFicher(operations, repertoires, inodes, blocs);
+            creationFicher(operations, repertoires, inodes);
         } else if(strcmp(operation, "suppression_fichier\0") == 0){
             printf("suppression de fichier\n");
-            suppressionFichier(operations, repertoires, inodes, blocs);
+            suppressionFichier(operations, repertoires, inodes);
         } else if(strcmp(operation, "creation_repertoire") == 0){
             printf("creation de repertoire\n");
             creationRepertoire(operations, repertoires);
         } else if(strcmp(operation, "suppression_repertoire\0") == 0){
             printf("suppression de repertoire\n");
-            suppressionRepertoire(operations, repertoires, inodes, blocs);
+            suppressionRepertoire(operations, repertoires, inodes);
         } else if(strcmp(operation, "lire_fichier\0") == 0){
             printf("lire de fichier\n");
             lireFichier(operations, repertoires, inodes);
@@ -72,13 +74,12 @@ int main(int argc, char *argv[]){
         }
     }
 
-    sauvegarderTableBits(tab, blocs);
 
     fclose(operations);
     fclose(disque);
     fclose(repertoires);
     fclose(inodes);
-    fclose(blocs);
+    fclose(blocsSauve);
 
     return 0;
 }
@@ -86,14 +87,16 @@ int main(int argc, char *argv[]){
 void chargerTableBits(int *tab, FILE *blocs){
     fseek(blocs, 0, SEEK_END);
     if(ftell(blocs) != 0){
-            fread(tab, sizeof(int), 1000, blocs);
+        fseek(blocs, 0, SEEK_SET);
+        fread(tab, sizeof(int), 1000, blocs);
     }
-
 }
 
 void sauvegarderTableBits(int *tab, FILE *blocs){
     rewind(blocs);
-    fwrite(tab, sizeof(int), 1000, blocs);
+    for(int i = 0; i < 1000; ++i){
+        fwrite(&tab[i], sizeof(int), 1, blocs);
+    }
 }
 
 bool fichierExiste(char *nom, FILE *inodes){
@@ -195,7 +198,7 @@ bool lireContenu(FILE *operations, char *contenu){
     return estOK;
 }
 
-void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
+void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes){
     char nom[MAX_CHEMIN + 1];
     char contenu[MAX_CONTENU + 1];
     struct inode *i = malloc(sizeof(struct inode));
@@ -227,7 +230,7 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blo
     }
 }
 
-void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
+void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes){
     char nom[MAX_CHEMIN + 1];
 
     if(lireChemin(operations, nom)){
@@ -266,7 +269,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
 
 }
 
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs){
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes){
     char chemin[MAX_CHEMIN + 1];
 
     if(lireChemin(operations, chemin)){

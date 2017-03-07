@@ -13,4 +13,5 @@ clean:
 		rm -f disque
 		rm -f blocs
 		rm -f repertoires
+		rm -f inodes
 		clear
