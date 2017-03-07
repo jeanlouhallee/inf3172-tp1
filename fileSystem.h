@@ -6,7 +6,12 @@ struct inode {
     int id;
     char nom[42];
     int blocs[8];
+    struct indirection *indirect;
 
+};
+
+struct indirection {
+    int blocs[8];
 };
 
 void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, FILE *blocs);
@@ -32,3 +37,13 @@ bool repertoireParentExiste(char *chemin, FILE *repertoires);
 bool fichierExiste(char *chemin, FILE *inodes);
 
 bool repertoireExiste(char *chemin, FILE *repertoires);
+
+int * creerTableBits();
+
+void  SetBit(int tab[],  int index);
+
+int TestBit(int tab[],  int index);
+
+void chargerTableBits(int *tab, FILE *blocs);
+
+void sauvegarderTableBits(int *tab, FILE *blocs);

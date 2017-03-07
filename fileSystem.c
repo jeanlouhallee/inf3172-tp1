@@ -17,7 +17,10 @@
 
 int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
+    int tab[1000] = {0};
 
+    //SetBit(tab, 24355);
+    //printf("%d\n", TestBit(tab, 24355));
     if(argc != 2){
         fprintf(stderr, "Nom de fichier manquant ou arguments en trop\n" );
         return EXIT_FAILURE;
@@ -35,6 +38,8 @@ int main(int argc, char *argv[]){
     // Fichier contenant une liste des blocs libres
     FILE *blocs = fopen(FICHIER_BLOCS, "ab+");
 
+    chargerTableBits(tab, blocs);
+    printf("%d\n", TestBit(tab, 24355));
     // Creation du repertoire racine
     fseek(repertoires, 0, SEEK_END);
     if(ftell(repertoires) == 0){
@@ -67,6 +72,8 @@ int main(int argc, char *argv[]){
         }
     }
 
+    sauvegarderTableBits(tab, blocs);
+
     fclose(operations);
     fclose(disque);
     fclose(repertoires);
@@ -74,6 +81,19 @@ int main(int argc, char *argv[]){
     fclose(blocs);
 
     return 0;
+}
+
+void chargerTableBits(int *tab, FILE *blocs){
+    fseek(blocs, 0, SEEK_END);
+    if(ftell(blocs) != 0){
+            fread(tab, sizeof(int), 1000, blocs);
+    }
+
+}
+
+void sauvegarderTableBits(int *tab, FILE *blocs){
+    rewind(blocs);
+    fwrite(tab, sizeof(int), 1000, blocs);
 }
 
 bool fichierExiste(char *nom, FILE *inodes){
@@ -277,3 +297,15 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes){
     }
 
 }
+
+void  SetBit(int tab[],  int index){
+      tab[index / 32] |= 1 << (index % 32);
+}
+
+int TestBit(int tab[],  int index){
+      return ( (tab[index / 32] & (1 << (index % 32) )) != 0 ) ;
+}
+
+void  ClearBit(int tab[],  int index){
+      tab[index / 32] &= ~(1 << (index % 32));
+ }
