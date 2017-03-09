@@ -214,12 +214,6 @@ bool lireChemin(FILE *operations, char *chemin){
     return estOK;
 }
 
-void sauterContenu(FILE *fic){
-    
-    fscanf(fic, "%*[^\n]");
-    return;
-}
-
 bool lireContenu(FILE *operations, char *contenu){
     bool estOK = true;
 
@@ -236,7 +230,7 @@ bool lireContenu(FILE *operations, char *contenu){
         return estOK = false;
     } else if(strlen(contenu) >= MAX_CONTENU){
         fprintf(stderr, "--Contenu du fichier trop long--\n");
-        sauterContenu(operations);
+        fscanf(operations, "%*[^\n]");
         return estOK = false;
     }
 

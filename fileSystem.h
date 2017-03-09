@@ -55,8 +55,6 @@ bool repertoireExiste(char *chemin, FILE *repertoires);
 
 void creerRepertoireRacine(FILE *repertoires);
 
-void sauterContenu(FILE *fic);
-
 int divisionPlafond(int num, int den);
 
 char ** fragmenterContenu(const char *contenu);
