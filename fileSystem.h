@@ -38,11 +38,17 @@ bool fichierExiste(char *chemin, FILE *inodes);
 
 bool repertoireExiste(char *chemin, FILE *repertoires);
 
+int divisionPlafond(int num, int den);
+
+char ** fragmenterContenu(const char *contenu);
+
 int * creerTableBits();
 
-void  SetBit(int tab[],  int index);
+void  setBit(int tab[],  int index);
 
-int TestBit(int tab[],  int index);
+int testBit(int tab[],  int index);
+
+void  clearBit(int tab[],  int index);
 
 void chargerTableBits(int *tab, FILE *blocs);
 

@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
     int tab[1000] = {0};
 
-    //SetBit(tab, 24355);
+    //setBit(tab, 24355);
 
     if(argc != 2){
         fprintf(stderr, "--Nom de fichier manquant ou arguments en trop--\n" );
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
 
     chargerTableBits(tab, blocsCharge);
     fclose(blocsCharge);
-    printf("%d\n", TestBit(tab, 24355));
+    printf("%d\n", testBit(tab, 24355));
     // Creation du repertoire racine
     fseek(repertoires, 0, SEEK_END);
     if(ftell(repertoires) == 0){
@@ -87,6 +87,38 @@ int main(int argc, char *argv[]){
     fclose(blocsSauve);
 
     return 0;
+}
+
+int divisionPlafond(int num, int den){
+    int resultat;
+    if(num % den != 0){
+        resultat = num / den + 1;
+    }else{
+        resultat = num / den;
+    }
+    return resultat;
+}
+
+char ** fragmenterContenu(const char *contenu){
+    int taille = strlen(contenu) - 1;
+    int reste = taille % MAX_BLOCS;
+    int nbFragments = divisionPlafond(taille, MAX_BLOCS);
+    char **fragments;
+    fragments = (char**) malloc(nbFragments*sizeof(char*));
+    for(int i = 0; i < nbFragments; ++i){
+        fragments[i] = (char*) malloc(MAX_BLOCS*sizeof(char) + 1);
+        if(i == nbFragments - 1){
+
+            memcpy(fragments[i], contenu + (MAX_BLOCS * i), reste);
+            strcpy(&fragments[i][reste], "\0");
+            //printf("Fragment:%s\n", fragments[i]);
+        }else {
+            memcpy(fragments[i], contenu + (MAX_BLOCS * i), MAX_BLOCS);
+            strcpy(&fragments[i][MAX_BLOCS], "\0");
+            //printf("Fragment:%s\n", fragments[i]);
+        }
+    }
+    return fragments;
 }
 
 void chargerTableBits(int *tab, FILE *blocs){
@@ -191,10 +223,11 @@ bool lireContenu(FILE *operations, char *contenu){
     fseek(operations, 1, SEEK_CUR);
     fgets(contenu, MAX_CONTENU + 1, operations);
 
+
     if(strlen(contenu) >= MAX_CONTENU){
         fprintf(stderr, "--Contenu du fichier trop long--\n");
         return estOK = false;
-    } else if(strlen(contenu) == 0){
+    } else if(/**strlen(contenu) == 1**/contenu == NULL){
         fprintf(stderr, "--Le fichier ne peut pas etre vide--\n");
         return estOK = false;
     }
@@ -207,16 +240,21 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes){
     char nom[MAX_CHEMIN + 1];
     char contenu[MAX_CONTENU + 1];
     bool cheminOk, fichierOk, repertoireParentOk = false;
+    int nbFragments;
     //struct inode *i = malloc(sizeof(struct inode));
-
     // Verifie si le disque est plein
     cheminOk = lireChemin(operations, nom);
     fichierOk = !fichierExiste(nom, inodes);
     repertoireParentOk = repertoireParentExiste(nom, repertoires);
     if(lireContenu(operations, contenu) && cheminOk && fichierOk && repertoireParentOk){
-        printf("Écriture dans fichier!\n");
+        nbFragments = divisionPlafond(strlen(contenu) - 1, MAX_BLOCS);
+        char ** fragments = fragmenterContenu(contenu);
+        for(int i = 0; i < nbFragments; ++i){
+            printf("Fragment: %s\n", fragments[i]);
+        }
+        free(fragments);
     }else if(!fichierOk){
-        printf("--Le fichier n'existe deja--\n");
+        printf("--Le fichier existe deja--\n");
     } else if(!repertoireParentOk){
         printf("--Le repertoire n'existe pas--\n");
     }
@@ -318,14 +356,14 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes){
 
 }
 
-void  SetBit(int tab[],  int index){
+void  setBit(int tab[],  int index){
       tab[index / 32] |= 1 << (index % 32);
 }
 
-int TestBit(int tab[],  int index){
+int testBit(int tab[],  int index){
       return ( (tab[index / 32] & (1 << (index % 32) )) != 0 ) ;
 }
 
-void  ClearBit(int tab[],  int index){
+void  clearBit(int tab[],  int index){
       tab[index / 32] &= ~(1 << (index % 32));
  }
