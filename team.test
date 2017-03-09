@@ -5,7 +5,13 @@ creation_repertoire /main/a1/b1/c1
 creation_fichier /main/a1/b1/c1/fichier1.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 creation_fichier /main/a1/b1/c1/d1/e1/s/f1/g1/fichier2.tx Cet40te chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 creation_fichier /main/a1/b1/c1/d1/e1/s/f1/g1/fichier2.txt Cet41te chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
+creation_fichier /main/a1/b1/c1/fichier3.txt
 creation_fichier /main/a1/b1/c1/fichier2.txt Juste un bloc
 creation_fichier /main/a1/b1/c1/d1/e1/f1/g1/h1/fichier2.txt Cet42te chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 creation_fichier /main/a1/b1/e1/f1/g1/h1/fichier2.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
-creation_fichier /main/a1/b1/c1/fichier2.txt Salut mon pote, as tu vu ma nouvelle planete? oh yess!
+creation_fichier /main/a1/b1/c1/fichier4.txt Salut mon pote, as tu vu ma nouvelle planete? oh yess!
+creation_fichier /main/a1/b1/c1/fichier5.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
+creation_fichier /main/a1/b1/c1/fichier6.txt
+creation_fichier /main/a1/b1/c1/fichier7.txt
+creation_fichier /main/a1/b1/c1/fichier8.txt
+creation_fichier /main/a1/b1/c1/fichier9.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.

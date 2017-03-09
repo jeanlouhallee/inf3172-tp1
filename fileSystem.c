@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
     fclose(blocsCharge);
 
     creerRepertoireRacine(repertoires);
-    
+
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier")  == 0){
@@ -76,7 +76,7 @@ void creerRepertoireRacine(FILE *repertoires){
     struct repertoire *r = malloc(sizeof(struct repertoire));
 
     fseek(repertoires, 0, SEEK_END);
-    if(ftell(repertoires) == 0){      
+    if(ftell(repertoires) == 0){
         strcpy(r->chemin, "/\0");
         fseek(repertoires, 0, SEEK_SET);
         fwrite(r, sizeof(struct repertoire), 1, repertoires);
@@ -219,7 +219,6 @@ bool lireContenu(FILE *operations, char *contenu){
 
     fseek(operations, 1, SEEK_CUR);
     fgets(contenu, MAX_CONTENU + 1, operations);
-
     if(strstr(contenu, "creation_fichier") != NULL ||
     strstr(contenu, "suppression_fichier") != NULL ||
     strstr(contenu, "creation_repertoire") != NULL ||
@@ -233,7 +232,6 @@ bool lireContenu(FILE *operations, char *contenu){
         fscanf(operations, "%*[^\n]");
         return estOK = false;
     }
-
     printf("Contenu : %s", contenu);
 
     return estOK;
@@ -267,7 +265,6 @@ void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, int *tab)
     } else if(!repertoireParentOk){
         printf("--Le repertoire n'existe pas--\n");
     }
-    printf("----------------------------ID %d", i->id);
     free(i);
 }
 
