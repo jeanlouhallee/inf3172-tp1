@@ -10,8 +10,6 @@ int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
     int tab[1000] = {0};
 
-    //setBit(tab, 24355);
-
     if(argc != 2){
         fprintf(stderr, "--Nom de fichier manquant ou arguments en trop--\n" );
         return EXIT_FAILURE;
@@ -32,24 +30,15 @@ int main(int argc, char *argv[]){
     chargerTableBits(tab, blocsCharge);
     fclose(blocsCharge);
 
-    // Creation du repertoire racine
-    fseek(repertoires, 0, SEEK_END);
-    if(ftell(repertoires) == 0){
-        struct repertoire *r = malloc(sizeof(struct repertoire));
-        strcpy(r->chemin, "/\0");
-        fseek(repertoires, 0, SEEK_SET);
-        fwrite(r, sizeof(struct repertoire), 1, repertoires);
-        free(r);
-    }
-    FILE *blocsSauvegarde = fopen(FICHIER_BLOCS, "wb");
-    sauvegarderTableBits(tab, blocsSauvegarde);
+    creerRepertoireRacine(repertoires);
+    
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier")  == 0){
             printf("creation de fichier\n");
             creationFicher(operations, repertoires, inodes, tab);
             printf("\n");
-        } else if(strcmp(operation, "suppression_fichier\0") == 0){
+        } else if(strcmp(operation, "suppression_fichier") == 0){
             printf("suppression de fichier\n");
             suppressionFichier(operations, repertoires, inodes);
             printf("\n");
@@ -57,20 +46,22 @@ int main(int argc, char *argv[]){
             printf("creation de repertoire\n");
             creationRepertoire(operations, repertoires);
             printf("\n");
-        } else if(strcmp(operation, "suppression_repertoire\0") == 0){
+        } else if(strcmp(operation, "suppression_repertoire") == 0){
             printf("suppression de repertoire\n");
             suppressionRepertoire(operations, repertoires, inodes);
             printf("\n");
-        } else if(strcmp(operation, "lire_fichier\0") == 0){
+        } else if(strcmp(operation, "lire_fichier") == 0){
             printf("lire de fichier\n");
             lireFichier(operations, repertoires, inodes);
             printf("\n");
         } else {
-            fprintf(stderr, "OOPS" );
+            fprintf(stderr, "--Erreur dans le fichier d'operations--" );
             return EXIT_FAILURE;
         }
     }
 
+    FILE *blocsSauvegarde = fopen(FICHIER_BLOCS, "wb");
+    sauvegarderTableBits(tab, blocsSauvegarde);
 
     fclose(operations);
     fclose(disque);
@@ -79,6 +70,20 @@ int main(int argc, char *argv[]){
     fclose(blocsSauvegarde);
 
     return 0;
+}
+
+void creerRepertoireRacine(FILE *repertoires){
+    struct repertoire *r = malloc(sizeof(struct repertoire));
+
+    fseek(repertoires, 0, SEEK_END);
+    if(ftell(repertoires) == 0){      
+        strcpy(r->chemin, "/\0");
+        fseek(repertoires, 0, SEEK_SET);
+        fwrite(r, sizeof(struct repertoire), 1, repertoires);
+        free(r);
+    }
+
+    return;
 }
 
 int divisionPlafond(int num, int den){
@@ -209,20 +214,32 @@ bool lireChemin(FILE *operations, char *chemin){
     return estOK;
 }
 
+void sauterContenu(FILE *fic){
+    
+    fscanf(fic, "%*[^\n]");
+    return;
+}
+
 bool lireContenu(FILE *operations, char *contenu){
     bool estOK = true;
 
     fseek(operations, 1, SEEK_CUR);
     fgets(contenu, MAX_CONTENU + 1, operations);
 
-
-    if(strlen(contenu) >= MAX_CONTENU){
-        fprintf(stderr, "--Contenu du fichier trop long--\n");
-        return estOK = false;
-    } else if(/**strlen(contenu) == 1**/contenu == NULL){
+    if(strstr(contenu, "creation_fichier") != NULL ||
+    strstr(contenu, "suppression_fichier") != NULL ||
+    strstr(contenu, "creation_repertoire") != NULL ||
+    strstr(contenu, "suppression_repertoire") != NULL ||
+    strstr(contenu, "lire_fichier") != NULL){
         fprintf(stderr, "--Le fichier ne peut pas etre vide--\n");
+        fseek(operations, -(strlen(contenu)), SEEK_CUR);
+        return estOK = false;
+    } else if(strlen(contenu) >= MAX_CONTENU){
+        fprintf(stderr, "--Contenu du fichier trop long--\n");
+        sauterContenu(operations);
         return estOK = false;
     }
+
     printf("Contenu : %s", contenu);
 
     return estOK;
@@ -271,7 +288,6 @@ void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes){
 
         } else {
             fprintf(stderr, "--Le fichier n'existe pas--\n");
-            //exit(EXIT_FAILURE);
         }
     }
 
@@ -289,11 +305,9 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
                 fwrite(r, sizeof(struct repertoire), 1, repertoires);
             } else {
                 fprintf(stderr, "--Le repertoire existe deja--\n");
-                //exit(EXIT_FAILURE);
             }
         } else {
             fprintf(stderr, "--Le repertoire parent n'existe pas--\n");
-            //exit(EXIT_FAILURE);
         }
     }
 
@@ -310,7 +324,6 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes){
 
         } else {
             fprintf(stderr, "--Le repertoire n'existe pas--\n");
-            //exit(EXIT_FAILURE);
         }
     }
 
@@ -325,7 +338,6 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes){
 
         } else {
             fprintf(stderr, "--Le fichier n'existe pas--\n");
-            //exit(EXIT_FAILURE);
         }
     }
 
