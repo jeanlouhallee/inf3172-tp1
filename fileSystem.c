@@ -6,15 +6,6 @@
 #include <unistd.h>
 #include "fileSystem.h"
 
-#define MAX_CHEMIN 41
-#define MAX_BLOCS 16
-#define MAX_OPERATION 23
-#define MAX_CONTENU 256
-#define FICHIER_DISQUE "disque"
-#define FICHIER_REPERTOIRES "repertoires"
-#define FICHIER_INODES "inodes"
-#define FICHIER_BLOCS "blocs"
-
 int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
     int tab[1000] = {0};
@@ -40,7 +31,7 @@ int main(int argc, char *argv[]){
 
     chargerTableBits(tab, blocsCharge);
     fclose(blocsCharge);
-    printf("%d\n", testBit(tab, 24355));
+
     // Creation du repertoire racine
     fseek(repertoires, 0, SEEK_END);
     if(ftell(repertoires) == 0){
@@ -48,14 +39,15 @@ int main(int argc, char *argv[]){
         strcpy(r->chemin, "/\0");
         fseek(repertoires, 0, SEEK_SET);
         fwrite(r, sizeof(struct repertoire), 1, repertoires);
+        free(r);
     }
-    FILE *blocsSauve = fopen(FICHIER_BLOCS, "wb");
-    sauvegarderTableBits(tab, blocsSauve);
+    FILE *blocsSauvegarde = fopen(FICHIER_BLOCS, "wb");
+    sauvegarderTableBits(tab, blocsSauvegarde);
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier")  == 0){
             printf("creation de fichier\n");
-            creationFicher(operations, repertoires, inodes);
+            creationFicher(operations, repertoires, inodes, tab);
             printf("\n");
         } else if(strcmp(operation, "suppression_fichier\0") == 0){
             printf("suppression de fichier\n");
@@ -84,7 +76,7 @@ int main(int argc, char *argv[]){
     fclose(disque);
     fclose(repertoires);
     fclose(inodes);
-    fclose(blocsSauve);
+    fclose(blocsSauvegarde);
 
     return 0;
 }
@@ -236,53 +228,36 @@ bool lireContenu(FILE *operations, char *contenu){
     return estOK;
 }
 
-void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes){
+int assignerId(int *tab){
+    int i = 0;
+    while(testBit(tab, i) == 1 && i <= 32000){
+        ++i;
+    }
+    return i;
+}
+
+void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
     char nom[MAX_CHEMIN + 1];
     char contenu[MAX_CONTENU + 1];
     bool cheminOk, fichierOk, repertoireParentOk = false;
     int nbFragments;
-    //struct inode *i = malloc(sizeof(struct inode));
+    struct inode *i = malloc(sizeof(struct inode));
     // Verifie si le disque est plein
     cheminOk = lireChemin(operations, nom);
     fichierOk = !fichierExiste(nom, inodes);
     repertoireParentOk = repertoireParentExiste(nom, repertoires);
     if(lireContenu(operations, contenu) && cheminOk && fichierOk && repertoireParentOk){
+        i->id = assignerId(tab);
         nbFragments = divisionPlafond(strlen(contenu) - 1, MAX_BLOCS);
         char ** fragments = fragmenterContenu(contenu);
-        for(int i = 0; i < nbFragments; ++i){
-            printf("Fragment: %s\n", fragments[i]);
-        }
         free(fragments);
     }else if(!fichierOk){
         printf("--Le fichier existe deja--\n");
     } else if(!repertoireParentOk){
         printf("--Le repertoire n'existe pas--\n");
     }
-    /**
-    if(lireChemin(operations, nom)){
-        if(!fichierExiste(nom, inodes)){
-            if(repertoireParentExiste(nom, repertoires)){
-                if(lireContenu(operations, contenu)){
-                    strcpy(i->nom, nom);
-
-                    // Verifie s'il reste assez d'espace sur le disque
-
-                    // Cree un i-node pour le fichier
-
-                    // Enregistre le fichier sur le disque
-
-                    // Indique que les blocs sont utilises
-                }
-            } else {
-            fprintf(stderr, "Le repertoire n'existe pas\n");
-            //exit(EXIT_FAILURE);
-            }
-        } else {
-            fprintf(stderr, "Le fichier existe deja\n");
-            //exit(EXIT_FAILURE);
-        }
-    }
-    **/
+    printf("----------------------------ID %d", i->id);
+    free(i);
 }
 
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes){

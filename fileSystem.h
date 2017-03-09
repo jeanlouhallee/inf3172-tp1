@@ -1,3 +1,12 @@
+#define MAX_CHEMIN 41
+#define MAX_BLOCS 16
+#define MAX_OPERATION 23
+#define MAX_CONTENU 256
+#define FICHIER_DISQUE "disque"
+#define FICHIER_REPERTOIRES "repertoires"
+#define FICHIER_INODES "inodes"
+#define FICHIER_BLOCS "blocs"
+
 struct repertoire {
     char chemin[42];
 };
@@ -14,7 +23,13 @@ struct indirection {
     int blocs[8];
 };
 
-void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes);
+struct bloc {
+    char contenu[16];
+};
+
+void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
+
+int assignerId(int *tab);
 
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes);
 
