@@ -128,7 +128,7 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, in
  *
  * @return void
  */
-void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes);
+void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque);
 
 /*
  * Lit un chemin absolu a partir d'un fichier
@@ -182,7 +182,7 @@ bool lireContenu(FILE *operations, char *contenu);
  * @return vrai si le fichier existe
  *         faux sinon
  */
-bool fichierExiste(char *chemin, FILE *inodes);
+bool fichierExiste(char *chemin, FILE *inodes, struct inode *inode);
 
 /*
  * Verifie si le repertoire existe deja dans le systeme
