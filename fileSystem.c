@@ -9,6 +9,7 @@
 int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
     int tab[1000] = {0};
+    FILE *disque;
 
     if(argc != 2){
         fprintf(stderr, "--Nom de fichier manquant ou arguments en trop--\n" );
@@ -18,8 +19,14 @@ int main(int argc, char *argv[]){
     // Fichier d'operations donne en parametre
     FILE *operations = fopen(argv[1], "r");
     // Fichier utilise pour le disque
-    FILE *disque = fopen(FICHIER_DISQUE, "ab+");
-    ftruncate(fileno(disque), 512 * 1000);
+    disque = fopen(FICHIER_DISQUE, "r");
+    if(!disque){
+        disque = fopen(FICHIER_DISQUE, "ab+");
+        ftruncate(fileno(disque), 512 * 1000);
+    }else{
+        fclose(disque);
+        disque = fopen(FICHIER_DISQUE, "ab+");
+    }
     // Fichier contenant une liste des repertoires
     FILE *repertoires = fopen(FICHIER_REPERTOIRES, "ab+");
     // Fichier contenant les i-nodes
@@ -36,7 +43,7 @@ int main(int argc, char *argv[]){
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier")  == 0){
             printf("creation de fichier\n");
-            creationFicher(operations, repertoires, inodes, tab);
+            creationFicher(disque, operations, repertoires, inodes, tab);
             printf("\n");
         } else if(strcmp(operation, "suppression_fichier") == 0){
             printf("suppression de fichier\n");
@@ -108,11 +115,9 @@ char ** fragmenterContenu(const char *contenu){
 
             memcpy(fragments[i], contenu + (MAX_BLOCS * i), reste);
             strcpy(&fragments[i][reste], "\0");
-            //printf("Fragment:%s\n", fragments[i]);
         }else {
             memcpy(fragments[i], contenu + (MAX_BLOCS * i), MAX_BLOCS);
             strcpy(&fragments[i][MAX_BLOCS], "\0");
-            //printf("Fragment:%s\n", fragments[i]);
         }
     }
     return fragments;
@@ -139,7 +144,6 @@ bool fichierExiste(char *nom, FILE *inodes){
 
     fseek(inodes, 0, SEEK_SET);
     while((fread(&buffer, sizeof(struct inode), 1, inodes) != 0) && !existe){
-
         if(strcmp(buffer.nom, nom) == 0){
             existe = true;
         }
@@ -153,10 +157,8 @@ bool repertoireExiste(char *chemin, FILE *repertoires){
 
     fseek(repertoires, 0, SEEK_SET);
     while((fread(&buffer, sizeof(struct repertoire), 1, repertoires) != 0) && !existe){
-
         if(strcmp(buffer.chemin, chemin) == 0){
             existe = true;
-
         }
     }
     return existe;
@@ -237,28 +239,75 @@ bool lireContenu(FILE *operations, char *contenu){
     return estOK;
 }
 
-int assignerId(int *tab){
+int prochainBlocLibre(int *tab){
     int i = 0;
-    while(testBit(tab, i) == 1 && i <= 32000){
+    while(testBit(tab, i) == 1 && i < 32000){
         ++i;
     }
+    setBit(tab, i);
     return i;
 }
 
-void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
+void disqueEstPlein(int *tab){
+    int i = 0;
+    while(testBit(tab, i) == 1 && i < 32000){
+        ++i;
+    }
+    if(i == 32000 - 1){
+        fprintf(stderr, "Le disque est plein: arrêt du programe.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void ecritureDisque(FILE *disque, struct inode *inode){
+
+}
+
+void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab){
+    if(inode->nbFragments > 8){
+        inode->indirect = malloc(sizeof(struct indirection));
+    }
+    fwrite(inode, sizeof(struct repertoire), 1, inodes);
+    inode->blocs[0] = inode->id;
+    printf("GIGA MEGA TEST BLOC INSERTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!: %d\n", inode->blocs[0]);
+    for(int i = 1; i < inode->nbFragments; ++i){
+        if(i <= 7){
+            inode->blocs[i] = prochainBlocLibre(tab);
+            printf("GIGA MEGA TEST BLOC INSERTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!: %d\n", inode->blocs[i]);
+        }else{
+            inode->indirect->blocs[i - 8] = prochainBlocLibre(tab);
+            printf("GIGA MEGA TEST BLOC INSERTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!: %d\n", inode->indirect->blocs[i - 8]);
+        }
+
+    }
+}
+
+void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
     char nom[MAX_CHEMIN + 1];
     char contenu[MAX_CONTENU + 1];
     bool cheminOk, fichierOk, repertoireParentOk = false;
     int nbFragments;
     struct inode *i = malloc(sizeof(struct inode));
-    // Verifie si le disque est plein
+
+    disqueEstPlein(tab);
     cheminOk = lireChemin(operations, nom);
     fichierOk = !fichierExiste(nom, inodes);
     repertoireParentOk = repertoireParentExiste(nom, repertoires);
     if(lireContenu(operations, contenu) && cheminOk && fichierOk && repertoireParentOk){
-        i->id = assignerId(tab);
         nbFragments = divisionPlafond(strlen(contenu) - 1, MAX_BLOCS);
         char ** fragments = fragmenterContenu(contenu);
+        i->id = prochainBlocLibre(tab);
+        strcpy(i->nom, nom);
+        i->nbFragments = nbFragments;
+
+        ecritureFichier(disque, inodes, fragments, i, tab);
+
+
+
+
+
+
+
         free(fragments);
     }else if(!fichierOk){
         printf("--Le fichier existe deja--\n");

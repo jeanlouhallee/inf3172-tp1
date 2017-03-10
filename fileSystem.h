@@ -14,6 +14,7 @@ struct repertoire {
 struct inode {
     int id;
     char nom[42];
+    int nbFragments;
     int blocs[8];
     struct indirection *indirect;
 
@@ -27,9 +28,13 @@ struct bloc {
     char contenu[16];
 };
 
-void creationFicher(FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
+void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
 
-int assignerId(int *tab);
+void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab);
+
+int prochainBlocLibre(int *tab);
+
+void disqueEstPlein(int *tab);
 
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes);
 
