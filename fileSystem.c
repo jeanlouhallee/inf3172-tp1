@@ -10,7 +10,6 @@ int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
     int tab[1000] = {0};
     FILE *disque;
-
     if(argc != 2){
         fprintf(stderr, "--Nom de fichier manquant ou arguments en trop--\n" );
         return EXIT_FAILURE;
@@ -66,7 +65,11 @@ int main(int argc, char *argv[]){
             return EXIT_FAILURE;
         }
     }
-
+    fseek(disque, 0, SEEK_SET);
+    struct bloc test;
+    while(fread(&test, sizeof(struct bloc), 1, disque)){
+        printf("CONTENU DU DISQUE: %s\n", test.contenu);
+    }
     FILE *blocsSauvegarde = fopen(FICHIER_BLOCS, "wb");
     sauvegarderTableBits(tab, blocsSauvegarde);
 
@@ -245,22 +248,15 @@ int prochainBlocLibre(int *tab){
         ++i;
     }
     setBit(tab, i);
-    return i;
-}
-
-void disqueEstPlein(int *tab){
-    int i = 0;
-    while(testBit(tab, i) == 1 && i < 32000){
-        ++i;
-    }
-    if(i == 32000 - 1){
+    if(i == 32000){
         fprintf(stderr, "Le disque est plein: arrêt du programe.\n");
         exit(EXIT_FAILURE);
     }
+    return i;
 }
 
-void ecritureDisque(FILE *disque, struct inode *inode){
-
+void ecritureDisque(FILE *disque, struct inode *inode, char **fragments){
+    //fseek(disque, , SEEK_SET);
 }
 
 void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab){
@@ -269,17 +265,29 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
     }
     fwrite(inode, sizeof(struct repertoire), 1, inodes);
     inode->blocs[0] = inode->id;
-    printf("GIGA MEGA TEST BLOC INSERTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!: %d\n", inode->blocs[0]);
+
+    struct bloc *fragment = malloc(sizeof(struct bloc));
+    strcpy(fragment->contenu, fragments[0]);
+    fseek(disque, inode->blocs[0] * 16, SEEK_SET);
+    fwrite(fragment, sizeof(struct bloc), 1, disque);
+    free(fragment);
+
     for(int i = 1; i < inode->nbFragments; ++i){
+        struct bloc *fragment = malloc(sizeof(struct bloc));
+        strcpy(fragment->contenu, fragments[i]);
         if(i <= 7){
             inode->blocs[i] = prochainBlocLibre(tab);
-            printf("GIGA MEGA TEST BLOC INSERTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!: %d\n", inode->blocs[i]);
+            fseek(disque, inode->blocs[i] * 16, SEEK_SET);
+            fwrite(fragment, sizeof(struct bloc), 1, disque);
         }else{
             inode->indirect->blocs[i - 8] = prochainBlocLibre(tab);
-            printf("GIGA MEGA TEST BLOC INSERTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!: %d\n", inode->indirect->blocs[i - 8]);
+            fseek(disque, inode->blocs[i - 8] * 16, SEEK_SET);
+            fwrite(fragment, sizeof(struct bloc), 1, disque);
         }
-
+        free(fragment);
     }
+    //ecritureDisque(disque, inode, fragments);
+    free(inode->indirect);
 }
 
 void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
@@ -289,7 +297,6 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     int nbFragments;
     struct inode *i = malloc(sizeof(struct inode));
 
-    disqueEstPlein(tab);
     cheminOk = lireChemin(operations, nom);
     fichierOk = !fichierExiste(nom, inodes);
     repertoireParentOk = repertoireParentExiste(nom, repertoires);

@@ -32,9 +32,9 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
 
 void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab);
 
-int prochainBlocLibre(int *tab);
+void ecritureDisque(FILE *disque, struct inode *inode,char **fragments);
 
-void disqueEstPlein(int *tab);
+int prochainBlocLibre(int *tab);
 
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes);
 
