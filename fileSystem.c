@@ -248,8 +248,9 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
     if(inode->nbFragments > 8){
         inode->indirect = malloc(sizeof(struct indirection));
     }
-    fwrite(inode, sizeof(struct repertoire), 1, inodes);
     inode->blocs[0] = inode->id;
+    fwrite(inode, sizeof(struct inode), 1, inodes);
+
 
     struct bloc *fragment = malloc(sizeof(struct bloc));
     memset(fragment->contenu,'\0',MAX_BLOCS);
@@ -276,12 +277,13 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
     free(inode->indirect);
 }
 
-char ** fragmenterContenu(const char *contenu){
+char ** fragmenterContenu(const char *contenu, struct inode *inode){
     int taille = strlen(contenu) - 1;
     int nbFragments = divisionPlafond(taille, MAX_BLOCS);
     taille = taille + nbFragments;
     nbFragments = divisionPlafond(taille, MAX_BLOCS);
     int reste = taille % (MAX_BLOCS);
+    inode->nbFragments = nbFragments;
     char **fragments;
     fragments = (char**) malloc(nbFragments*sizeof(char*));
 
@@ -303,23 +305,24 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     char nom[MAX_CHEMIN + 1];
     char contenu[MAX_CONTENU + 1];
     bool cheminOk, fichierOk, repertoireParentOk = false;
-    int nbFragments;
+    //int nbFragments;
     struct inode *i = malloc(sizeof(struct inode));
 
     cheminOk = lireChemin(operations, nom);
     fichierOk = !fichierExiste(nom, inodes);
     repertoireParentOk = repertoireParentExiste(nom, repertoires);
     if(lireContenu(operations, contenu) && cheminOk && fichierOk && repertoireParentOk){
-        nbFragments = divisionPlafond(strlen(contenu) - 1, MAX_BLOCS);
-        char ** fragments = fragmenterContenu(contenu);
+        //nbFragments = divisionPlafond(strlen(contenu) - 1, MAX_BLOCS);
+        char ** fragments = fragmenterContenu(contenu, i);
         i->id = prochainBlocLibre(tab);
         strcpy(i->nom, nom);
-        i->nbFragments = nbFragments;
+        //i->nbFragments = nbFragments;
+        printf("----ECRITURE SUR DISQUE----\n\n\n");
         ecritureFichier(disque, inodes, fragments, i, tab);
         free(fragments);
         free(i);
     }else if(!fichierOk){
-        printf("--Le fichier existe deja--\n");
+        printf("--Le fichier existe deja-----------------------------------------------------\n");
     } else if(!repertoireParentOk){
         printf("--Le repertoire n'existe pas--\n");
     }

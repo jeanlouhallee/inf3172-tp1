@@ -232,7 +232,7 @@ int divisionPlafond(int num, int den);
  *
  * @return un tableau de chaines de caracteres, le contenu de chaque bloc
  */
-char ** fragmenterContenu(const char *contenu);
+char ** fragmenterContenu(const char *contenu, struct inode *inode);
 
 /*
  * Verifie si le disque est plein
