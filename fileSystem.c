@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
     disque = fopen(FICHIER_DISQUE, "r");
     if(!disque){
         disque = fopen(FICHIER_DISQUE, "wb+");
-        //ftruncate(fileno(disque), TAILLE_DISQUE);
+        ftruncate(fileno(disque), TAILLE_DISQUE);
         //fseek(disque, 0, SEEK_SET);
     }else{
         fclose(disque);
