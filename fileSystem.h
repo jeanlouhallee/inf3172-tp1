@@ -14,10 +14,14 @@
 // Constantes //
 //------------//
 
-#define MAX_CHEMIN 41 // Longueur maximale d'un chemin absolu
+#define TAILLE_DISQUE 512000 // Taille du fichier utilise pour le disque en octets
 #define MAX_OPERATION 23 // Longueur maximale d'une chaine de caracteres representant une operation
-#define MAX_BLOCS 16
+#define MAX_CHEMIN 41 // Longueur maximale d'un chemin absolu
 #define MAX_CONTENU 256 // Longueur maximale du contenu d'un fichier
+#define MAX_BLOCS 16 // Nombre maximal d'octets par bloc
+#define NB_BLOCS 8 // Nombre de blocs que peut contenir un inode ou un bloc d'indirection simple
+#define TAB_BITS 1000 // Nombre d'entiers utilises pour la table de bits
+#define TAILLE_INT 32 // Taille d'un entier en octets
 #define FICHIER_DISQUE "disque" // Nom du fichier utilise pour le disque
 #define FICHIER_REPERTOIRES "repertoires" // Nom du fichier contenant la liste les des repertoires
 #define FICHIER_INODES "inodes" // Nom du fichier contenant les inodes
@@ -30,8 +34,6 @@
 
 /*
  * Structure representant un repertoire
- *
- * contenant son chemin absolu
  */
 struct repertoire {
     char chemin[MAX_CHEMIN + 1];
@@ -39,36 +41,28 @@ struct repertoire {
 
 /*
  * Structure representant un i-node
- *
- * contenant son identificateur
- *           son nom
- *           le nombre de blocs utilises
- *           un tableau avec les numeros de blocs qui y sont associes
- *           un bloc d'indirection simple
  */
 struct inode {
     int id;
     char nom[MAX_CHEMIN + 1];
     int nbFragments;
-    int blocs[8];
+    int blocs[NB_BLOCS];
     struct indirection *indirect;
 
 };
 
 /*
  * Struture representant un bloc d'indirection simple
- *
- * contenant un tableau avec les numeros de blocs qui y sont associes
  */
 struct indirection {
-    int blocs[8];
+    int blocs[NB_BLOCS];
 };
 
 /*
  * Structure representant un bloc
  */
 struct bloc {
-    char contenu[16];
+    char contenu[MAX_BLOCS];
 };
 
 
@@ -219,10 +213,6 @@ bool repertoireParentExiste(char *chemin, FILE *repertoires);
  */
 void creerRepertoireRacine(FILE *repertoires);
 
-void disqueEstPlein(int *tab);
-
-int prochainBlocLibre(int *tab);
-
 /*
  * Effectue une division et retourne le plafond du resultat
  *
@@ -241,6 +231,24 @@ int divisionPlafond(int num, int den);
  * @return un tableau de chaines de caracteres, le contenu de chaque bloc
  */
 char ** fragmenterContenu(const char *contenu);
+
+/*
+ * Verifie si le disque est plein
+ *
+ * @param tab : table de bits indiquant les blocs libres
+ * 
+ * @return void
+ */
+void disqueEstPlein(int *tab);
+
+/*
+ * Cherche l'index du prochain bloc libre
+ *
+ * @param tab : table de bits indiquant les blocs libres
+ * 
+ * @return un entier, l'index du prochain bloc libre
+ */
+int prochainBlocLibre(int *tab);
 
 /*
  * Charge la table de bits a partir d'un fichier

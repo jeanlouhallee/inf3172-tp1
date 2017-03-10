@@ -1,3 +1,14 @@
+/*
+ * TP1 : Simulation d'un systeme de fichiers
+ * 
+ * Cours : INF3172 Systeme d'exploitation
+ *
+ * Auteurs : Etienne Bergeron BERE08089101
+ *           Jean-Lou Hallee  HALJ05129309
+ *
+ * Dernières modifications : 12 mars 2017
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +19,7 @@
 
 int main(int argc, char *argv[]){
     char operation[MAX_OPERATION];
-    int tab[1000] = {0};
+    int tab[TAB_BITS] = {0};
     FILE *disque;
 
     if(argc != 2){
@@ -22,7 +33,7 @@ int main(int argc, char *argv[]){
     disque = fopen(FICHIER_DISQUE, "r");
     if(!disque){
         disque = fopen(FICHIER_DISQUE, "ab+");
-        ftruncate(fileno(disque), 512 * 1000);
+        ftruncate(fileno(disque), TAILLE_DISQUE);
     }else{
         fclose(disque);
         disque = fopen(FICHIER_DISQUE, "ab+");
@@ -80,10 +91,9 @@ int main(int argc, char *argv[]){
 }
 
 void creerRepertoireRacine(FILE *repertoires){
-    struct repertoire *r = malloc(sizeof(struct repertoire));
-
     fseek(repertoires, 0, SEEK_END);
     if(ftell(repertoires) == 0){
+        struct repertoire *r = malloc(sizeof(struct repertoire));
         strcpy(r->chemin, "/\0");
         fseek(repertoires, 0, SEEK_SET);
         fwrite(r, sizeof(struct repertoire), 1, repertoires);
@@ -133,7 +143,7 @@ void chargerTableBits(int *tab, FILE *blocs){
 
 void sauvegarderTableBits(int *tab, FILE *blocs){
     rewind(blocs);
-    for(int i = 0; i < 1000; ++i){
+    for(int i = 0; i < TAB_BITS; ++i){
         fwrite(&tab[i], sizeof(int), 1, blocs);
     }
 }
@@ -241,7 +251,7 @@ bool lireContenu(FILE *operations, char *contenu){
 
 int prochainBlocLibre(int *tab){
     int i = 0;
-    while(testBit(tab, i) == 1 && i < 32000){
+    while(testBit(tab, i) == 1 && i < TAB_BITS*TAILLE_INT){
         ++i;
     }
     setBit(tab, i);
@@ -250,10 +260,10 @@ int prochainBlocLibre(int *tab){
 
 void disqueEstPlein(int *tab){
     int i = 0;
-    while(testBit(tab, i) == 1 && i < 32000){
+    while(testBit(tab, i) == 1 && i < TAB_BITS*TAILLE_INT){
         ++i;
     }
-    if(i == 32000 - 1){
+    if(i == TAB_BITS - 1){
         fprintf(stderr, "Le disque est plein: arrêt du programe.\n");
         exit(EXIT_FAILURE);
     }
@@ -383,14 +393,14 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes){
 
 }
 
-void  setBit(int tab[],  int index){
-      tab[index / 32] |= 1 << (index % 32);
+void setBit(int tab[],  int index){
+    tab[index / TAILLE_INT] |= 1 << (index % TAILLE_INT);
 }
 
 int testBit(int tab[],  int index){
-      return ( (tab[index / 32] & (1 << (index % 32) )) != 0 ) ;
+    return ((tab[index / TAILLE_INT] & (1 << (index % TAILLE_INT))) != 0);
 }
 
-void  clearBit(int tab[],  int index){
-      tab[index / 32] &= ~(1 << (index % 32));
+void clearBit(int tab[],  int index){
+    tab[index / TAILLE_INT] &= ~(1 << (index % TAILLE_INT));
  }
