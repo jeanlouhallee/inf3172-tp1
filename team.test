@@ -16,3 +16,7 @@ creation_fichier /main/a1/b1/c1/fichier7.txt
 creation_fichier /main/a1/b1/c1/fichier8.txt
 creation_fichier /main/a1/b1/c1/fichier9.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 lire_fichier /main/a1/b1/c1/fichier1.txt
+lire_fichier /main/a1/b1/c1/fichier2.txt
+lire_fichier /main/a1/b1/c1/fichier4.txt
+lire_fichier /main/a1/b1/c1/fichier5.txt
+lire_fichier /main/a1/b1/c1/fichier9.txt
