@@ -65,11 +65,14 @@ int main(int argc, char *argv[]){
             return EXIT_FAILURE;
         }
     }
+
     fseek(disque, 0, SEEK_SET);
+
     struct bloc test;
     while(fread(&test, sizeof(struct bloc), 1, disque)){
         printf("CONTENU DU DISQUE: %s\n", test.contenu);
     }
+
     FILE *blocsSauvegarde = fopen(FICHIER_BLOCS, "wb");
     sauvegarderTableBits(tab, blocsSauvegarde);
 
@@ -99,31 +102,11 @@ void creerRepertoireRacine(FILE *repertoires){
 int divisionPlafond(int num, int den){
     int resultat;
     if(num % den != 0){
-        resultat = num / den + 1;
+        resultat = (num / den) + 1;
     }else{
-        resultat = num / den;
+        resultat = (num / den) + 1;
     }
     return resultat;
-}
-
-char ** fragmenterContenu(const char *contenu){
-    int taille = strlen(contenu) - 1;
-    int reste = taille % MAX_BLOCS;
-    int nbFragments = divisionPlafond(taille, MAX_BLOCS);
-    char **fragments;
-    fragments = (char**) malloc(nbFragments*sizeof(char*));
-    for(int i = 0; i < nbFragments; ++i){
-        fragments[i] = (char*) malloc(MAX_BLOCS*sizeof(char) + 1);
-        if(i == nbFragments - 1){
-
-            memcpy(fragments[i], contenu + (MAX_BLOCS * i), reste);
-            strcpy(&fragments[i][reste], "\0");
-        }else {
-            memcpy(fragments[i], contenu + (MAX_BLOCS * i), MAX_BLOCS);
-            strcpy(&fragments[i][MAX_BLOCS], "\0");
-        }
-    }
-    return fragments;
 }
 
 void chargerTableBits(int *tab, FILE *blocs){
@@ -270,11 +253,14 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
     strcpy(fragment->contenu, fragments[0]);
     fseek(disque, inode->blocs[0] * 16, SEEK_SET);
     fwrite(fragment, sizeof(struct bloc), 1, disque);
+    printf("CONTENU !!!!!!!!!!!!!!!!!!!!!!!!!!: %s\n", fragment->contenu);
     free(fragment);
 
     for(int i = 1; i < inode->nbFragments; ++i){
         struct bloc *fragment = malloc(sizeof(struct bloc));
+        memset(fragment->contenu,'\0',MAX_BLOCS);
         strcpy(fragment->contenu, fragments[i]);
+        printf("CONTENU !!!!!!!!!!!!!!!!!!!!!!!!!!: %s\n", fragment->contenu);
         if(i <= 7){
             inode->blocs[i] = prochainBlocLibre(tab);
             fseek(disque, inode->blocs[i] * 16, SEEK_SET);
@@ -288,6 +274,28 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
     }
     //ecritureDisque(disque, inode, fragments);
     free(inode->indirect);
+}
+
+char ** fragmenterContenu(const char *contenu){
+    int taille = strlen(contenu) - 1;
+    int nbFragments = divisionPlafond(taille, MAX_BLOCS);
+    taille = taille + nbFragments;
+    nbFragments = divisionPlafond(taille, MAX_BLOCS);
+    int reste = taille % (MAX_BLOCS);
+    char **fragments;
+    fragments = (char**) malloc(nbFragments*sizeof(char*));
+
+    for(int i = 0; i < nbFragments; ++i){
+        fragments[i] = (char*) malloc(MAX_BLOCS*sizeof(char));
+        if(i == nbFragments - 1){
+            memcpy(fragments[i], contenu + ((MAX_BLOCS - 1) * i), reste - 1);
+            strcpy(&fragments[i][reste], "\0");
+        }else {
+            memcpy(fragments[i], contenu + ((MAX_BLOCS - 1) * i) , MAX_BLOCS - 1);
+            strcpy(&fragments[i][MAX_BLOCS], "\0");
+        }
+    }
+    return fragments;
 }
 
 void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
