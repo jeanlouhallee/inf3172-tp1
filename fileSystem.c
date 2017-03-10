@@ -47,7 +47,7 @@ int main(int argc, char *argv[]){
             printf("\n");
         } else if(strcmp(operation, "suppression_fichier") == 0){
             printf("suppression de fichier\n");
-            suppressionFichier(operations, repertoires, inodes);
+            suppressionFichier(operations, repertoires, inodes, tab);
             printf("\n");
         } else if(strcmp(operation, "creation_repertoire") == 0){
             printf("creation de repertoire\n");
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
             printf("\n");
         } else if(strcmp(operation, "suppression_repertoire") == 0){
             printf("suppression de repertoire\n");
-            suppressionRepertoire(operations, repertoires, inodes);
+            suppressionRepertoire(operations, repertoires, inodes, tab);
             printf("\n");
         } else if(strcmp(operation, "lire_fichier") == 0){
             printf("lire de fichier\n");
@@ -317,7 +317,7 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     free(i);
 }
 
-void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes){
+void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
     char nom[MAX_CHEMIN + 1];
 
     if(lireChemin(operations, nom)){
@@ -353,7 +353,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
 
 }
 
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes){
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
     char chemin[MAX_CHEMIN + 1];
 
     if(lireChemin(operations, chemin)){

@@ -16,6 +16,7 @@
 
 #define MAX_CHEMIN 41 // Longueur maximale d'un chemin absolu
 #define MAX_OPERATION 23 // Longueur maximale d'une chaine de caracteres representant une operation
+#define MAX_BLOCS 16
 #define MAX_CONTENU 256 // Longueur maximale du contenu d'un fichier
 #define FICHIER_DISQUE "disque" // Nom du fichier utilise pour le disque
 #define FICHIER_REPERTOIRES "repertoires" // Nom du fichier contenant la liste les des repertoires
@@ -152,7 +153,7 @@ bool lireChemin(FILE *operations, char *chemin);
  * 
  * @return void
  */
-void lireNom(char *nom, char *chemin)
+void lireNom(char *nom, char *chemin);
 
 /*
  * Extrait le chemin absolu du repertoire parent d'un fichier ou d'un repertoire
@@ -186,7 +187,7 @@ bool lireContenu(FILE *operations, char *contenu);
  *         faux sinon
  */
 bool fichierExiste(char *chemin, FILE *inodes);
-t
+
 /*
  * Verifie si le repertoire existe deja dans le systeme
  *
