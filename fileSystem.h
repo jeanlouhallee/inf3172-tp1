@@ -20,6 +20,7 @@
 #define MAX_CONTENU 256 // Longueur maximale du contenu d'un fichier
 #define MAX_BLOCS 16 // Nombre maximal d'octets par bloc
 #define NB_BLOCS 8 // Nombre de blocs que peut contenir un inode ou un bloc d'indirection simple
+#define NB_BITS 32000 // Nombre de bits dans la table de bits
 #define TAB_BITS 1000 // Nombre d'entiers utilises pour la table de bits
 #define TAILLE_INT 32 // Taille d'un entier en octets
 #define FICHIER_DISQUE "disque" // Nom du fichier utilise pour le disque
@@ -83,6 +84,16 @@ struct bloc {
  */
 void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
 
+/*
+ * Ecris sur le disque
+ * @param disque : fichier utilise pour le disque
+ * @param inodes : fichier contenant la liste des i-nodes
+ * @param fragments : les fragments de texte a ecrire sur le disque
+ * @param inode : l'inode pour le fichier qu'on ecris
+ * @param tab : table de bits indiquant les blocs libres
+ *
+ * @return void
+ */
 void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab);
 
 /*
