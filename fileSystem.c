@@ -106,7 +106,7 @@ void creerRepertoireRacine(FILE *repertoires){
 int divisionPlafond(int num, int den){
     int resultat;
     if(num % den != 0){
-        resultat = num / den + 1;
+        resultat = (num / den) + 1;
     }else{
         resultat = num / den;
     }
@@ -243,9 +243,6 @@ int prochainBlocLibre(int *tab){
     return i;
 }
 
-void ecritureDisque(FILE *disque, struct inode *inode, char **fragments){
-    //fseek(disque, , SEEK_SET);
-}
 
 void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab){
     if(inode->nbFragments > 8){
@@ -255,17 +252,16 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
     inode->blocs[0] = inode->id;
 
     struct bloc *fragment = malloc(sizeof(struct bloc));
+    memset(fragment->contenu,'\0',MAX_BLOCS);
     strcpy(fragment->contenu, fragments[0]);
     fseek(disque, inode->blocs[0] * 16, SEEK_SET);
     fwrite(fragment, sizeof(struct bloc), 1, disque);
-    printf("CONTENU !!!!!!!!!!!!!!!!!!!!!!!!!!: %s\n", fragment->contenu);
     free(fragment);
 
     for(int i = 1; i < inode->nbFragments; ++i){
         struct bloc *fragment = malloc(sizeof(struct bloc));
         memset(fragment->contenu,'\0',MAX_BLOCS);
         strcpy(fragment->contenu, fragments[i]);
-        printf("CONTENU !!!!!!!!!!!!!!!!!!!!!!!!!!: %s\n", fragment->contenu);
         if(i <= 7){
             inode->blocs[i] = prochainBlocLibre(tab);
             fseek(disque, inode->blocs[i] * 16, SEEK_SET);
@@ -277,7 +273,6 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
         }
         free(fragment);
     }
-    //ecritureDisque(disque, inode, fragments);
     free(inode->indirect);
 }
 
@@ -320,22 +315,14 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
         i->id = prochainBlocLibre(tab);
         strcpy(i->nom, nom);
         i->nbFragments = nbFragments;
-
         ecritureFichier(disque, inodes, fragments, i, tab);
-
-
-
-
-
-
-
         free(fragments);
+        free(i);
     }else if(!fichierOk){
         printf("--Le fichier existe deja--\n");
     } else if(!repertoireParentOk){
         printf("--Le repertoire n'existe pas--\n");
     }
-    free(i);
 }
 
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, int *tab){

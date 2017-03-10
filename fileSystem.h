@@ -1,6 +1,6 @@
 /*
  * TP1 : Simulation d'un systeme de fichiers
- * 
+ *
  * Cours : INF3172 Systeme d'exploitation
  *
  * Auteurs : Etienne Bergeron BERE08089101
@@ -78,10 +78,12 @@ struct bloc {
  * @param repertoires : fichier contenant la liste des repertoires existants
  * @param inodes : fichier contenant la liste des i-nodes
  * @param tab : table de bits indiquant les blocs libres
- * 
+ *
  * @return void
  */
 void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
+
+void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab);
 
 /*
  * Supprime un fichier
@@ -90,7 +92,7 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
  * @param repertoires : fichier contenant la liste des repertoires existants
  * @param inodes : fichier contenant la liste des i-nodes
  * @param tab : table de bits indiquant les blocs libres
- * 
+ *
  * @return void
  */
 void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
@@ -100,7 +102,7 @@ void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, int *
  *
  * @param operations : fichier contenant les operations a effectuer
  * @param repertoires : fichier contenant la liste des repertoires existants
- * 
+ *
  * @return void
  */
 void creationRepertoire(FILE *operations, FILE *repertoires);
@@ -112,7 +114,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires);
  * @param repertoires : fichier contenant la liste des repertoires existants
  * @param inodes : fichier contenant la liste des i-nodes
  * @param tab : table de bits indiquant les blocs libres
- * 
+ *
  * @return void
  */
 void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
@@ -123,7 +125,7 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, in
  * @param operations : fichier contenant les operations a effectuer
  * @param repertoires : fichier contenant la liste des repertoires existants
  * @param inodes : fichier contenant la liste des i-nodes
- * 
+ *
  * @return void
  */
 void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes);
@@ -133,7 +135,7 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes);
  *
  * @param operations : fichier contenant les operations a effectuer
  * @param chemin : chemin absolu du fichier ou du repertoire
- * 
+ *
  * @return vrai si un chemin absolu valide a ete lu
  *         faux si le chemin absolu est trop long
  */
@@ -144,7 +146,7 @@ bool lireChemin(FILE *operations, char *chemin);
  *
  * @param nom : nom du fichier ou du repertoire
  * @param chemin : chemin absolu du fichier ou du repertoire
- * 
+ *
  * @return void
  */
 void lireNom(char *nom, char *chemin);
@@ -155,7 +157,7 @@ void lireNom(char *nom, char *chemin);
  * @param parent : chemin absolu du repertoire parent
  * @param chemin : chemin absolu du fichier ou du repertoire
  * @param nom : nom du fichier ou du repertoire
- * 
+ *
  * @return void
  */
 void lireRepertoireParent(char *parent, char *chemin, char *nom);
@@ -165,7 +167,7 @@ void lireRepertoireParent(char *parent, char *chemin, char *nom);
  *
  * @param operations : fichier contenant les operations a effectuer
  * @param contenu : contenu du fichier
- * 
+ *
  * @return vrai si le contenu du fichier est valide
  *         faux si le fichier est vide ou trop volumineux
  */
@@ -176,7 +178,7 @@ bool lireContenu(FILE *operations, char *contenu);
  *
  * @param chemin : chemin absolu du fichier
  * @param inodes : fichier contenant la liste des i-nodes
- * 
+ *
  * @return vrai si le fichier existe
  *         faux sinon
  */
@@ -187,7 +189,7 @@ bool fichierExiste(char *chemin, FILE *inodes);
  *
  * @param chemin : chemin absolu du repertoire
  * @param repertoires : fichier contenant la liste des repertoires existants
- * 
+ *
  * @return vrai si le repertoire existe
  *         faux sinon
  */
@@ -198,7 +200,7 @@ bool repertoireExiste(char *chemin, FILE *repertoires);
  *
  * @param chemin : chemin absolu du repertoire
  * @param repertoires : fichier contenant la liste des repertoires existants
- * 
+ *
  * @return vrai si le repertoire parent existe
  *         faux sinon
  */
@@ -208,7 +210,7 @@ bool repertoireParentExiste(char *chemin, FILE *repertoires);
  * Cree le repertoire racine s'il n'existe pas deja
  *
  * @param repertoires : fichier contenant la liste des repertoires existants
- * 
+ *
  * @return void
  */
 void creerRepertoireRacine(FILE *repertoires);
@@ -218,7 +220,7 @@ void creerRepertoireRacine(FILE *repertoires);
  *
  * @param num : numerateur
  * @param den : denominateur
- * 
+ *
  * @return un entier, le plafond du resultat de la divison
  */
 int divisionPlafond(int num, int den);
@@ -227,7 +229,7 @@ int divisionPlafond(int num, int den);
  * Fragmente le contenu d'un fichier en blocs de 16 octets
  *
  * @param contenu : contenu du fichier
- * 
+ *
  * @return un tableau de chaines de caracteres, le contenu de chaque bloc
  */
 char ** fragmenterContenu(const char *contenu);
@@ -236,7 +238,7 @@ char ** fragmenterContenu(const char *contenu);
  * Verifie si le disque est plein
  *
  * @param tab : table de bits indiquant les blocs libres
- * 
+ *
  * @return void
  */
 void disqueEstPlein(int *tab);
@@ -245,7 +247,7 @@ void disqueEstPlein(int *tab);
  * Cherche l'index du prochain bloc libre
  *
  * @param tab : table de bits indiquant les blocs libres
- * 
+ *
  * @return un entier, l'index du prochain bloc libre
  */
 int prochainBlocLibre(int *tab);
@@ -255,7 +257,7 @@ int prochainBlocLibre(int *tab);
  *
  * @param tab : table de bits indiquant les blocs libres
  * @param blocs : fichier contenant la table de bits
- * 
+ *
  * @return void
  */
 void chargerTableBits(int *tab, FILE *blocs);
@@ -265,7 +267,7 @@ void chargerTableBits(int *tab, FILE *blocs);
  *
  * @param tab : table de bits indiquant les blocs libres
  * @param blocs : fichier contenant la table de bits
- * 
+ *
  * @return void
  */
 void sauvegarderTableBits(int *tab, FILE *blocs);
@@ -275,7 +277,7 @@ void sauvegarderTableBits(int *tab, FILE *blocs);
  *
  * @param tab : table de bits indiquant les blocs libres
  * @param index : index du bit dans la table
- * 
+ *
  * @return void
  */
 void  setBit(int tab[],  int index);
@@ -285,7 +287,7 @@ void  setBit(int tab[],  int index);
  *
  * @param tab : table de bits indiquant les blocs libres
  * @param index : index du bit dans la table
- * 
+ *
  * @return void
  */
 void  clearBit(int tab[],  int index);
@@ -295,7 +297,7 @@ void  clearBit(int tab[],  int index);
  *
  * @param tab : table de bits indiquant les blocs libres
  * @param index : index du bit dans la table
- * 
+ *
  * @return un entier, la valeur du bit
  */
 int testBit(int tab[],  int index);
