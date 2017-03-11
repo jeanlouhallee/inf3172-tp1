@@ -28,30 +28,40 @@ int main(int argc, char *argv[]){
 
     // Fichier d'operations donne en parametre
     FILE *operations = fopen(argv[1], "r");
+    
     // Fichier utilise pour le disque
     FILE *disque = fopen(FICHIER_DISQUE, "r");
     if(!disque){
         disque = fopen(FICHIER_DISQUE, "wb+");
         ftruncate(fileno(disque), TAILLE_DISQUE);
-        //fseek(disque, 0, SEEK_SET);
     }else{
         fclose(disque);
         disque = fopen(FICHIER_DISQUE, "rb+");
     }
+
     // Fichier contenant une liste des repertoires
-    FILE *repertoires = fopen(FICHIER_REPERTOIRES, "ab+");
+    FILE *repertoires = fopen(FICHIER_REPERTOIRES, "r");
+    if(!repertoires){
+        repertoires = fopen(FICHIER_REPERTOIRES, "wb+");
+    }else{
+        fclose(repertoires);
+        repertoires = fopen(FICHIER_REPERTOIRES, "rb+");
+    }
+
     // Fichier contenant les i-nodes
-    FILE *inodes = fopen(FICHIER_INODES, "ab+");
+    FILE *inodes = fopen(FICHIER_INODES, "r");
+    if(!inodes){
+        inodes = fopen(FICHIER_INODES, "wb+");
+    }else{
+        fclose(inodes);
+        inodes = fopen(FICHIER_INODES, "rb+");
+    }
+
     // Fichier contenant une liste des blocs libres
     FILE *blocsCharge = fopen(FICHIER_BLOCS, "ab+");
-
     chargerTableBits(tab, blocsCharge);
     fclose(blocsCharge);
-    // clearBit(tab, 1);
-    // clearBit(tab, 4);
-    // //setBit(tab, 8);
-    // ///setBit(tab, 10);
-    // //setBit(tab, 11);
+
     creerRepertoireRacine(repertoires);
 
     // Lecture des operations
@@ -355,64 +365,6 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     return;
 }
 
-void ecritureFichierVide(FILE *disque, FILE *inodes, char **fragments, struct inode *inode){
-    if(inode->nbFragments >  NB_BLOCS){
-        inode->indirect = malloc(sizeof(struct indirection));
-    }
-
-    fseek(disque, 0, SEEK_SET);
-    inode->blocs[0] = inode->id;
-    struct bloc *fragment = malloc(sizeof(struct bloc));
-    memset(fragment->contenu,'\0',NB_OCTETS);
-    strcpy(fragment->contenu, fragments[0]);
-    fseek(disque, inode->blocs[0] * NB_OCTETS, SEEK_SET);
-    fwrite(fragment, sizeof(struct bloc), 1, disque);
-    free(fragment);
-
-    for(int i = 1; i < inode->nbFragments; ++i){
-        struct bloc *fragment = malloc(sizeof(struct bloc));
-        memset(fragment->contenu,'\0', NB_OCTETS);
-        strcpy(fragment->contenu, fragments[i]);
-        if(i <= NB_OCTETS - 1){
-            fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
-            fwrite(fragment, sizeof(struct bloc), 1, disque);
-        }else{
-            fseek(disque, inode->indirect->blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
-            fwrite(fragment, sizeof(struct bloc), 1, disque);
-        }
-        free(fragment);
-    }
-    // fwrite(inode, sizeof(struct inode), 1, inodes);
-    free(inode->indirect);
-
-    return;
-}
-
-void libererBlocs(FILE *disque, FILE *inodes, struct inode *inode){
-    struct inode *inodeVide = malloc(sizeof(struct inode));
-
-    inodeVide->id = inode->id;
-    inodeVide->nbFragments = inode->nbFragments;
-    inodeVide->indirect = inode->indirect;
-    for(int i = 0; i < NB_OCTETS - 1; ++i){
-        inodeVide->blocs[i] = inode->blocs[i];
-    }
-
-    char **fragments = (char**) malloc(inodeVide->nbFragments*sizeof(char*));
-    for(int i = 0; i < NB_OCTETS * 2; ++i){
-        fragments[i] = (char*) malloc(NB_OCTETS*sizeof(char));
-    }
-
-    ecritureFichierVide(disque, inodes, fragments, inodeVide);
-
-    for(int j = 0; j < NB_OCTETS * 2; ++j){
-            free(fragments[j]);
-        }
-    free(fragments);
-
-    return;
-}
-
 void suppressionFichier(FILE *operations, FILE *disque, FILE *inodes, int *tab){
     char nom[MAX_CHEMIN + 1];
     struct inode *inode = malloc(sizeof(struct inode));
@@ -422,10 +374,10 @@ void suppressionFichier(FILE *operations, FILE *disque, FILE *inodes, int *tab){
     if(lireChemin(operations, nom)){
         if(position != 0){
             
-            libererBlocs(disque, inodes, inode);
+            //libererBlocs(disque, inodes, inode);
 
             struct inode *inodeVide = malloc(sizeof(struct inode));
-            fseek(inodes, position * (sizeof(struct inode)), SEEK_SET);
+            fseek(inodes, (position - 1) * (sizeof(struct inode)), SEEK_SET);
             fwrite(inodeVide, sizeof(struct inode), 1, inodes);
 
         } else {
