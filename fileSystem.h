@@ -190,11 +190,12 @@ bool fichierExiste(char *chemin, FILE *inodes, struct inode *inode, int position
  *
  * @param chemin : chemin absolu du repertoire
  * @param repertoires : fichier contenant la liste des repertoires existants
+ * @param position : position du repertoire dans le fichier de repertoires
  *
  * @return vrai si le repertoire existe
  *         faux sinon
  */
-bool repertoireExiste(char *chemin, FILE *repertoires);
+bool repertoireExiste(char *chemin, FILE *repertoires, int position);
 
 /*
  * Verifie si le repertoire parent d'un fichier ou d'un repertoire existe deja dans le systeme
@@ -274,7 +275,7 @@ int prochainBlocLibre(int tab[]);
  *
  * @return void
  */
-void libererBlocs(int tab[], struct inode inode);
+void libererBlocs(int tab[], struct inode *inode);
 
 /*
  * Charge la table de bits a partir d'un fichier
