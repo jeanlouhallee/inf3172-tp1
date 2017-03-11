@@ -67,23 +67,23 @@ int main(int argc, char *argv[]){
     // Lecture des operations
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier")  == 0){
-            //printf("creation de fichier\n");
+            printf("creation de fichier\n");
             creationFicher(disque, operations, repertoires, inodes, tab);
             printf("\n");
         } else if(strcmp(operation, "suppression_fichier") == 0){
-            //printf("suppression de fichier\n");
+            printf("suppression de fichier\n");
             suppressionFichier(operations, repertoires, inodes, tab);
             printf("\n");
         } else if(strcmp(operation, "creation_repertoire") == 0){
-            //printf("creation de repertoire\n");
+            printf("creation de repertoire\n");
             creationRepertoire(operations, repertoires);
             printf("\n");
         } else if(strcmp(operation, "suppression_repertoire") == 0){
-            //printf("suppression de repertoire\n");
+            printf("suppression de repertoire\n");
             suppressionRepertoire(operations, repertoires, inodes, disque, tab);
             printf("\n");
         } else if(strcmp(operation, "lire_fichier") == 0){
-            //printf("lire de fichier\n");
+            printf("lire de fichier\n");
             lireFichier(operations, repertoires, inodes, disque);
             printf("\n");
         } else {
@@ -186,7 +186,7 @@ void lireNom(char *nom, char *chemin){
 
     ptrNom = strrchr(chemin, '/') + 1;
     strcpy(nom, ptrNom);
-    //printf("Nom : %s\n", nom);
+    printf("Nom : %s\n", nom);
 
     return;
 }
@@ -201,7 +201,7 @@ void lireRepertoireParent(char *parent, char *chemin, char *nom){
         strncpy(parent, chemin, longueur);
         parent[longueur] = '\0';
     }
-    //printf("Repertoire parent : %s\n", parent);
+    printf("Repertoire parent : %s\n", parent);
 
     return;
 }
@@ -224,7 +224,7 @@ bool lireChemin(FILE *operations, char *chemin){
     bool estOK = true;
 
     fscanf(operations, "%41s", chemin);
-    //printf("Chemin : %s\n", chemin);
+    printf("Chemin : %s\n", chemin);
 
     if(strlen(chemin) >= MAX_CHEMIN){
         fprintf(stderr, "--Chemin absolu trop long--\n");
@@ -253,7 +253,7 @@ bool lireContenu(FILE *operations, char *contenu){
         fscanf(operations, "%*[^\n]");
         return estOK = false;
     }
-    //printf("Contenu : %s", contenu);
+    printf("Contenu : %s", contenu);
 
     return estOK;
 }
@@ -437,21 +437,44 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
     struct inode i;
     struct repertoire r;
     int longueur = strlen(chemin);
+    fpos_t position;
 
     // Supprimer les fichiers
     fseek(inodes, 0, SEEK_SET);
-    while(fread(&i, sizeof(struct inode), 1, inodes) != 0){
+    while((fread(&i, sizeof(struct inode), 1, inodes)) != 0){
+
+        printf("Nom : %s\n", i.nom);
+
         if(memcmp(i.nom, chemin, longueur) == 0){
+            printf("SUPPRESSION FICHIER\n" );
+
+            fgetpos(inodes, &position);
+
             suppression(disque, inodes, tab, i.nom);
+
+            fsetpos(inodes, &position);
         }
     }
+
     // Supprimer les repertoires et leurs contenu
     fseek(repertoires, 0, SEEK_SET);
-    while(fread(&r, sizeof(struct repertoire), 1, repertoires) != 0){
+    while((fread(&r, sizeof(struct repertoire), 1, repertoires)) != 0){
+
+        printf("Nom : %s\n", r.chemin);
+
         if(memcmp(r.chemin, chemin, longueur) == 0){
+            printf("SUPPRESSION REPERTOIRE\n" );
+
+            fgetpos(repertoires, &position);
+
             suppressionRecursive(repertoires, inodes, disque, tab, r.chemin);
+
+            fsetpos(repertoires, &position);
         }
+        
     }
+
+    printf("FIN\n" );
 
     return;
 }
