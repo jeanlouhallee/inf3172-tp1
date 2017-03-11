@@ -321,6 +321,9 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
         i->id = prochainBlocLibre(tab);
         strcpy(i->nom, nom);
         ecritureFichier(disque, inodes, fragments, i, tab);
+        for(int j = 0; j < i->nbFragments; ++j){
+            free(fragments[j]);
+        }
         free(fragments);
         free(i);
     }else if(!fichierOk){

@@ -15,8 +15,36 @@ creation_fichier /main/a1/b1/c1/fichier6.txt
 creation_fichier /main/a1/b1/c1/fichier7.txt
 creation_fichier /main/a1/b1/c1/fichier8.txt
 creation_fichier /main/a1/b1/c1/fichier9.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
+creation_fichier /main/a1/b1/c1/fichier14.txt Juste un blocasfsdfdf
+creation_fichier /main/a1/b1/c1/fichier15.txt Juste un blocdsfsa
+creation_fichier /main/a1/b1/c1/fichier16.txt Juste un blocasdfsdfasdfadf
+creation_fichier /main/a1/b1/c1/fichier17.txt Juste un blocsdf
+creation_fichier /main/a1/b1/c1/fichier18.txt Juste un blocsdfsadafas
+creation_fichier /main/a1/b1/c1/fichier19.txt Juste un blocsdfsadfasfdasfdasdf
+creation_fichier /main/a1/b1/c1/fichier20.txt Juste un blocsdfasfsdfsasdfasdfasdf
+creation_fichier /main/a1/b1/c1/fichier21.txt Juste un blocdsafsa
+creation_fichier /main/a1/b1/c1/fichier22.txt Juste un blocadsf
+creation_fichier /main/a1/b1/c1/fichier23.txt Juste un bloca
+creation_fichier /main/a1/b1/c1/fichier24.txt Juste un blocsdfgsdfgsdfgfg
+creation_fichier /main/a1/b1/c1/fichier25.txt Juste un blocsfgsdfgdf
+creation_fichier /main/a1/b1/c1/fichier26.txt Juste un blocdfgsdfgsdfgsg
+creation_fichier /main/a1/b1/c1/fichier27.txt Juste un blocsdfgsdfgsdfg
 lire_fichier /main/a1/b1/c1/fichier1.txt
 lire_fichier /main/a1/b1/c1/fichier2.txt
 lire_fichier /main/a1/b1/c1/fichier4.txt
 lire_fichier /main/a1/b1/c1/fichier5.txt
 lire_fichier /main/a1/b1/c1/fichier9.txt
+lire_fichier /main/a1/b1/c1/fichier14.txt
+lire_fichier /main/a1/b1/c1/fichier15.txt
+lire_fichier /main/a1/b1/c1/fichier16.txt
+lire_fichier /main/a1/b1/c1/fichier17.txt
+lire_fichier /main/a1/b1/c1/fichier18.txt
+lire_fichier /main/a1/b1/c1/fichier19.txt
+lire_fichier /main/a1/b1/c1/fichier20.txt
+lire_fichier /main/a1/b1/c1/fichier21.txt
+lire_fichier /main/a1/b1/c1/fichier22.txt
+lire_fichier /main/a1/b1/c1/fichier23.txt
+lire_fichier /main/a1/b1/c1/fichier24.txt
+lire_fichier /main/a1/b1/c1/fichier25.txt
+lire_fichier /main/a1/b1/c1/fichier26.txt
+lire_fichier /main/a1/b1/c1/fichier27.txt

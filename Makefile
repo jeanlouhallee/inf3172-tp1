@@ -3,7 +3,7 @@ exe: fileSystem.o
 	rm *.o
 fileSystem.o: fileSystem.c fileSystem.h
 	clear
-	gcc -c -Wall fileSystem.c 
+	gcc -c -g -std=gnu99 -Wall fileSystem.c 
 
 
 .PHONY: clean
