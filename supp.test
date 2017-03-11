@@ -1,0 +1,11 @@
+creation_fichier /fichier1 Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
+lire_fichier /fichier1
+suppression_fichier /fichier1
+lire_fichier /fichier1
+creation_fichier /fichier2 Chaine differente.
+lire_fichier /fichier2
+creation_repertoire /r1
+creation_repertoire /r1/r2
+creation_fichier /r1/r2/fichier3 Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
+suppression_repertoire /r1
+creation_repertoire /r1/r2/r3
