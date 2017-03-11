@@ -116,8 +116,13 @@ void creationRepertoire(FILE *operations, FILE *repertoires);
  *
  * @return void
  */
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, int tab[]);
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque, int tab[]);
 
+void suppression();
+
+void suppressionRecursive(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin);
+
+void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin);
 /*
  * Affiche le contenu d'un fichier
  *
