@@ -18,10 +18,10 @@
 #define MAX_OPERATION 23 // Longueur maximale d'une chaine de caracteres representant une operation
 #define MAX_CHEMIN 41 // Longueur maximale d'un chemin absolu
 #define MAX_CONTENU 256 // Longueur maximale du contenu d'un fichier
-#define MAX_BLOCS 16 // Nombre maximal d'octets par bloc
+#define NB_OCTETS 16 // Nombre d'octets par bloc
 #define NB_BLOCS 8 // Nombre de blocs que peut contenir un inode ou un bloc d'indirection simple
-#define NB_BITS 32000 // Nombre de bits dans la table de bits
-#define TAB_BITS 1000 // Nombre d'entiers utilises pour la table de bits
+#define TAB_BITS 32000 // Nombre de bits dans la table de bits
+#define TAB_INT 1000 // Nombre d'entiers utilises pour la table de bits
 #define TAILLE_INT 32 // Taille d'un entier en octets
 #define FICHIER_DISQUE "disque" // Nom du fichier utilise pour le disque
 #define FICHIER_REPERTOIRES "repertoires" // Nom du fichier contenant la liste les des repertoires
@@ -63,7 +63,7 @@ struct indirection {
  * Structure representant un bloc
  */
 struct bloc {
-    char contenu[MAX_BLOCS];
+    char contenu[NB_OCTETS];
 };
 
 
@@ -85,22 +85,10 @@ struct bloc {
 void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
 
 /*
- * Ecris sur le disque
- * @param disque : fichier utilise pour le disque
- * @param inodes : fichier contenant la liste des i-nodes
- * @param fragments : les fragments de texte a ecrire sur le disque
- * @param inode : l'inode pour le fichier qu'on ecris
- * @param tab : table de bits indiquant les blocs libres
- *
- * @return void
- */
-void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab);
-
-/*
  * Supprime un fichier
  *
  * @param operations : fichier contenant les operations a effectuer
- * @param repertoires : fichier contenant la liste des repertoires existants
+ * @param disque : fichier utilise pour le disque
  * @param inodes : fichier contenant la liste des i-nodes
  * @param tab : table de bits indiquant les blocs libres
  *
@@ -189,11 +177,11 @@ bool lireContenu(FILE *operations, char *contenu);
  *
  * @param chemin : chemin absolu du fichier
  * @param inodes : fichier contenant la liste des i-nodes
+ * @param inode : l'inode representant le fichier
  *
- * @return vrai si le fichier existe
- *         faux sinon
+ * @return un entier, la position de l'inode dans le fichier d'inodes
  */
-bool fichierExiste(char *chemin, FILE *inodes, struct inode *inode);
+int fichierExiste(char *chemin, FILE *inodes, struct inode *inode);
 
 /*
  * Verifie si le repertoire existe deja dans le systeme
@@ -225,6 +213,19 @@ bool repertoireParentExiste(char *chemin, FILE *repertoires);
  * @return void
  */
 void creerRepertoireRacine(FILE *repertoires);
+
+/*
+ * Ecrit sur le disque
+ *
+ * @param disque : fichier utilise pour le disque
+ * @param inodes : fichier contenant la liste des i-nodes
+ * @param fragments : les fragments de texte a ecrire sur le disque
+ * @param inode : l'inode pour le fichier qu'on ecris
+ * @param tab : table de bits indiquant les blocs libres
+ *
+ * @return void
+ */
+void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab);
 
 /*
  * Effectue une division et retourne le plafond du resultat
