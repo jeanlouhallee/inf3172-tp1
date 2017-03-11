@@ -129,7 +129,7 @@ int divisionPlafond(int num, int den){
     return resultat;
 }
 
-void chargerTableBits(int *tab, FILE *blocs){
+void chargerTableBits(int tab[], FILE *blocs){
     fseek(blocs, 0, SEEK_END);
     if(ftell(blocs) != 0){
         fseek(blocs, 0, SEEK_SET);
@@ -139,7 +139,7 @@ void chargerTableBits(int *tab, FILE *blocs){
     return;
 }
 
-void sauvegarderTableBits(int *tab, FILE *blocs){
+void sauvegarderTableBits(int tab[], FILE *blocs){
     rewind(blocs);
     for(int i = 0; i < TAB_INT; ++i){
         fwrite(&tab[i], sizeof(int), 1, blocs);
@@ -257,7 +257,7 @@ bool lireContenu(FILE *operations, char *contenu){
 }
 
 
-int prochainBlocLibre(int *tab){
+int prochainBlocLibre(int tab[]){
     int i = 0;
     while(testBit(tab, i) == 1 && i < TAB_BITS){
         ++i;
@@ -273,7 +273,7 @@ int prochainBlocLibre(int *tab){
 }
 
 
-void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab){
+void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int tab[]){
     if(inode->nbFragments >  NB_BLOCS){
         inode->indirect = malloc(sizeof(struct indirection));
     }
@@ -291,7 +291,7 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
         struct bloc *fragment = malloc(sizeof(struct bloc));
         memset(fragment->contenu,'\0',NB_OCTETS);
         strcpy(fragment->contenu, fragments[i]);
-        if(i <= NB_OCTETS - 1){
+        if(i < NB_OCTETS){
             inode->blocs[i] = prochainBlocLibre(tab);
             fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
             fwrite(fragment, sizeof(struct bloc), 1, disque);
@@ -335,7 +335,7 @@ char ** fragmenterContenu(const char *contenu, struct inode *inode){
 }
 
 
-void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
+void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int tab[]){
     char nom[MAX_CHEMIN + 1];
     char contenu[MAX_CONTENU + 1];
     bool cheminOk, fichierOk, repertoireParentOk = false;
@@ -365,13 +365,20 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     return;
 }
 
-void libererBlocs(){
-
+void libererBlocs(int tab[], struct inode inode){
+    
+    for(int i = 0; i < inode->nbFragments; ++i){
+        if(i < NB_OCTETS){
+            clearBit(tab, inode->blocs[i]);
+        }else{
+            clearBit(tab, inode->indirect->blocs[i - NB_OCTETS]);
+        }
+    }
 
     return;
 }
 
-void suppressionFichier(FILE *operations, FILE *disque, FILE *inodes, int *tab){
+void suppressionFichier(FILE *operations, FILE *disque, FILE *inodes, int tab[]){
     char nom[MAX_CHEMIN + 1];
     struct inode *inode = malloc(sizeof(struct inode));
 
@@ -380,7 +387,7 @@ void suppressionFichier(FILE *operations, FILE *disque, FILE *inodes, int *tab){
     if(lireChemin(operations, nom)){
         if(fichierExiste(nom, inodes, inode, position)){
             
-            //libererBlocs(disque, inodes, inode);
+            libererBlocs(tab, inode);
 
             struct inode *inodeVide = malloc(sizeof(struct inode));
             strcpy(inodeVide->nom, "\0");
@@ -419,7 +426,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
     return;
 }
 
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, int *tab){
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, int tab[]){
     char chemin[MAX_CHEMIN + 1];
 
     if(lireChemin(operations, chemin)){
@@ -446,7 +453,7 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
             printf("\n\n");
             for(int i = 0; i < inode->nbFragments; ++i){
                 struct bloc *fragment = malloc(sizeof(struct bloc));
-                if(i <= NB_OCTETS - 1){
+                if(i < NB_OCTETS){
                     fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
                     fread(fragment, sizeof(struct bloc), 1, disque);
                     printf("%s", fragment->contenu);

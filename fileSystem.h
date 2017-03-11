@@ -82,7 +82,7 @@ struct bloc {
  *
  * @return void
  */
-void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
+void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int tab[]);
 
 /*
  * Supprime un fichier
@@ -94,7 +94,7 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
  *
  * @return void
  */
-void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
+void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, int tab[]);
 
 /*
  * Cree un repertoire
@@ -116,7 +116,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires);
  *
  * @return void
  */
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, int *tab);
+void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, int tab[]);
 
 /*
  * Affiche le contenu d'un fichier
@@ -227,7 +227,7 @@ void creerRepertoireRacine(FILE *repertoires);
  *
  * @return void
  */
-void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int *tab);
+void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int tab[]);
 
 /*
  * Effectue une division et retourne le plafond du resultat
@@ -255,7 +255,7 @@ char ** fragmenterContenu(const char *contenu, struct inode *inode);
  *
  * @return void
  */
-void disqueEstPlein(int *tab);
+void disqueEstPlein(int tab[]);
 
 /*
  * Cherche l'index du prochain bloc libre
@@ -264,7 +264,17 @@ void disqueEstPlein(int *tab);
  *
  * @return un entier, l'index du prochain bloc libre
  */
-int prochainBlocLibre(int *tab);
+int prochainBlocLibre(int tab[]);
+
+/*
+ * 
+ *
+ * @param tab : table de bits indiquant les blocs libres
+ * @param inode : 
+ *
+ * @return void
+ */
+void libererBlocs(int tab[], struct inode inode);
 
 /*
  * Charge la table de bits a partir d'un fichier
@@ -274,7 +284,7 @@ int prochainBlocLibre(int *tab);
  *
  * @return void
  */
-void chargerTableBits(int *tab, FILE *blocs);
+void chargerTableBits(int tab[], FILE *blocs);
 
 /*
  * Sauvegarde la table de bits dans un fichier
@@ -284,7 +294,7 @@ void chargerTableBits(int *tab, FILE *blocs);
  *
  * @return void
  */
-void sauvegarderTableBits(int *tab, FILE *blocs);
+void sauvegarderTableBits(int tab[], FILE *blocs);
 
 /*
  * Met le bit a 1
