@@ -367,8 +367,7 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     return;
 }
 
-void libererBlocs(int tab[], struct inode *inode){
-    
+void libererBlocs(int tab[], struct inode *inode){   
     for(int i = 0; i < inode->nbFragments; ++i){
         if(i < NB_OCTETS){
             clearBit(tab, inode->blocs[i]);
@@ -376,7 +375,7 @@ void libererBlocs(int tab[], struct inode *inode){
             clearBit(tab, inode->indirect->blocs[i - NB_OCTETS]);
         }
     }
-
+    
     return;
 }
 
@@ -392,10 +391,9 @@ void suppressionFichier(FILE *operations, FILE *disque, FILE *inodes, int tab[])
             // Supprime l'inode du fichier d'inodes
             struct inode *inodeVide = malloc(sizeof(struct inode));
             strcpy(inodeVide->nom, "\0");
-            fseek(inodes, (position - 1) * sizeof(struct inode), SEEK_SET);
+            fseek(inodes, position * sizeof(struct inode), SEEK_SET);
             fwrite(inodeVide, sizeof(struct inode), 1, inodes);
             free(inodeVide);
-
         } else {
             fprintf(stderr, "--Le fichier n'existe pas--\n");
         }
@@ -428,6 +426,10 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
     return;
 }
 
+void suppressionContenu(){
+
+}
+
 void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, int tab[]){
     char chemin[MAX_CHEMIN + 1];
     int position = 0;
@@ -438,8 +440,8 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, in
 
             // Supprime le repertoire du fichier de repertoires
             struct repertoire *r = malloc(sizeof(struct repertoire));
-            strcpy(r->chemin, "");
-            fseek(repertoires, (position -1) * sizeof(struct repertoire), SEEK_SET);
+            strcpy(r->chemin, "\0");
+            fseek(repertoires, position * sizeof(struct repertoire), SEEK_SET);
             fwrite(r, sizeof(struct repertoire), 1, repertoires);
             free(r);
         } else {
@@ -458,6 +460,9 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
     if(lireChemin(operations, nom)){
         if(fichierExiste(nom, inodes, inode, position)){
             printf("\n\n");
+
+            printf("Nom : %s\n", inode->nom);
+
             for(int i = 0; i < inode->nbFragments; ++i){
                 struct bloc *fragment = malloc(sizeof(struct bloc));
                 if(i < NB_OCTETS){
