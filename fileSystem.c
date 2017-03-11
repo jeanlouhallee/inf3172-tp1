@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
 
     // Fichier d'operations donne en parametre
     FILE *operations = fopen(argv[1], "r");
-    
+
     // Fichier utilise pour le disque
     FILE *disque = fopen(FICHIER_DISQUE, "r");
     if(!disque){
@@ -148,9 +148,8 @@ void sauvegarderTableBits(int *tab, FILE *blocs){
     return;
 }
 
-int fichierExiste(char *nom, FILE *inodes, struct inode *inode){
+bool fichierExiste(char *nom, FILE *inodes, struct inode *inode, int position){
     bool existe = false;
-    int position = 0;
     struct inode buffer;
 
     fseek(inodes, 0, SEEK_SET);
@@ -164,7 +163,7 @@ int fichierExiste(char *nom, FILE *inodes, struct inode *inode){
         }
     }
 
-    return position;
+    return existe;
 }
 
 bool repertoireExiste(char *chemin, FILE *repertoires){
@@ -340,9 +339,10 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     char nom[MAX_CHEMIN + 1];
     char contenu[MAX_CONTENU + 1];
     bool cheminOk, fichierOk, repertoireParentOk = false;
+    int position = 0;
 
     cheminOk = lireChemin(operations, nom);
-    fichierOk = !fichierExiste(nom, inodes, NULL);
+    fichierOk = !fichierExiste(nom, inodes, NULL, position);
     repertoireParentOk = repertoireParentExiste(nom, repertoires);
 
     if(lireContenu(operations, contenu) && cheminOk && fichierOk && repertoireParentOk){
@@ -365,20 +365,28 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     return;
 }
 
+void libererBlocs(){
+
+
+    return;
+}
+
 void suppressionFichier(FILE *operations, FILE *disque, FILE *inodes, int *tab){
     char nom[MAX_CHEMIN + 1];
     struct inode *inode = malloc(sizeof(struct inode));
 
-    int position = fichierExiste(nom, inodes, inode);
+    int position = 0;
 
     if(lireChemin(operations, nom)){
-        if(position != 0){
+        if(fichierExiste(nom, inodes, inode, position)){
             
             //libererBlocs(disque, inodes, inode);
 
             struct inode *inodeVide = malloc(sizeof(struct inode));
+            strcpy(inodeVide->nom, "\0");
             fseek(inodes, (position - 1) * (sizeof(struct inode)), SEEK_SET);
             fwrite(inodeVide, sizeof(struct inode), 1, inodes);
+            free(inodeVide);
 
         } else {
             fprintf(stderr, "--Le fichier n'existe pas--\n");
@@ -431,18 +439,19 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, in
 void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque){
     char nom[MAX_CHEMIN + 1];
     struct inode *inode = malloc(sizeof(struct inode));
+    int position = 0;
 
     if(lireChemin(operations, nom)){
-        if(fichierExiste(nom, inodes, inode)){
+        if(fichierExiste(nom, inodes, inode, position)){
             printf("\n\n");
             for(int i = 0; i < inode->nbFragments; ++i){
                 struct bloc *fragment = malloc(sizeof(struct bloc));
-                if(i <= 7){
+                if(i <= NB_OCTETS - 1){
                     fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
                     fread(fragment, sizeof(struct bloc), 1, disque);
                     printf("%s", fragment->contenu);
                 }else{
-                    fseek(disque, inode->blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
+                    fseek(disque, inode->indirect->blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
                     fwrite(fragment, sizeof(struct bloc), 1, disque);
                     printf("%s", fragment->contenu);
                 }

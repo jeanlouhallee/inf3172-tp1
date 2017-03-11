@@ -178,10 +178,12 @@ bool lireContenu(FILE *operations, char *contenu);
  * @param chemin : chemin absolu du fichier
  * @param inodes : fichier contenant la liste des i-nodes
  * @param inode : l'inode representant le fichier
+ * @param position : position de l'inode dans le fichier d'inodes
  *
- * @return un entier, la position de l'inode dans le fichier d'inodes
+ * @return vrai si le fichier existe
+ *         faux sinon
  */
-int fichierExiste(char *chemin, FILE *inodes, struct inode *inode);
+bool fichierExiste(char *chemin, FILE *inodes, struct inode *inode, int position);
 
 /*
  * Verifie si le repertoire existe deja dans le systeme
