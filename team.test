@@ -65,3 +65,4 @@ lire_fichier /main/a1/b1/fichier9.txt
 lire_fichier /main/a1/b1/fichier14.txt
 lire_fichier /main/a1/b1/fichier15.txt
 lire_fichier /main/a1/b1/fichier17.txt
+suppression_repertoire /main
