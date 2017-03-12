@@ -166,13 +166,13 @@ bool fichierExiste(char *nom, FILE *inodes, struct inode *inode, int *position){
     return existe;
 }
 
-bool repertoireExiste(char *chemin, FILE *repertoires, int position){
+bool repertoireExiste(char *chemin, FILE *repertoires, int *position){
     bool existe = false;
     struct repertoire buffer;
 
     fseek(repertoires, 0, SEEK_SET);
     while((fread(&buffer, sizeof(struct repertoire), 1, repertoires) != 0) && !existe){
-        ++ position;
+        ++(*position);
         if(strcmp(buffer.chemin, chemin) == 0){
             existe = true;
         }
@@ -215,7 +215,7 @@ bool repertoireParentExiste(char *chemin, FILE *repertoires){
     lireNom(nom, chemin);
     lireRepertoireParent(repertoireParent, chemin, nom);
 
-    existe = repertoireExiste(repertoireParent, repertoires, position);
+    existe = repertoireExiste(repertoireParent, repertoires, &position);
 
     return existe;
 }
@@ -417,7 +417,7 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
 
     if(lireChemin(operations, chemin)){
         if(repertoireParentExiste(chemin, repertoires)){
-            if(!repertoireExiste(chemin, repertoires, position)){
+            if(!repertoireExiste(chemin, repertoires, &position)){
                 struct repertoire *r = malloc(sizeof(struct repertoire));
                 strcpy(r->chemin, chemin);
                 fseek(repertoires, 0, SEEK_END);
@@ -436,7 +436,6 @@ void creationRepertoire(FILE *operations, FILE *repertoires){
 
 void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin){
     struct inode i;
-    printf("ENTRE DANS FONCTION\n");
     struct repertoire r;
     int longueur = strlen(chemin);
     fpos_t position;
@@ -449,15 +448,11 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
 
         if(memcmp(i.nom, chemin, longueur) == 0){
             printf("SUPPRESSION FICHIER\n" );
-
             fgetpos(inodes, &position);
-
             suppression(disque, inodes, tab, i.nom);
-
             fsetpos(inodes, &position);
         }
     }
-
     // Supprimer les repertoires et leurs contenu
     fseek(repertoires, 0, SEEK_SET);
     while((fread(&r, sizeof(struct repertoire), 1, repertoires)) != 0){
@@ -465,12 +460,8 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
         printf("Nom 2222: %s\n", r.chemin);
 
         if(memcmp(r.chemin, chemin, longueur) == 0){
-            printf("SUPPRESSION REPERTOIRE\n" );
-
             fgetpos(repertoires, &position);
-
             suppressionRecursive(repertoires, inodes, disque, tab, r.chemin);
-
             fsetpos(repertoires, &position);
         }
 
@@ -484,10 +475,10 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
 void suppressionRecursive(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin){
     int position = 0;
 
-    if(repertoireExiste(chemin, repertoires, position)){
+    if(repertoireExiste(chemin, repertoires, &position)){
         struct repertoire *r = malloc(sizeof(struct repertoire));
         strcpy(r->chemin, "\0");
-        fseek(repertoires, position * sizeof(struct repertoire), SEEK_SET);
+        fseek(repertoires, (position - 1) * sizeof(struct repertoire), SEEK_SET);
         fwrite(r, sizeof(struct repertoire), 1, repertoires);
         free(r);
 

@@ -200,7 +200,7 @@ bool fichierExiste(char *chemin, FILE *inodes, struct inode *inode, int *positio
  * @return vrai si le repertoire existe
  *         faux sinon
  */
-bool repertoireExiste(char *chemin, FILE *repertoires, int position);
+bool repertoireExiste(char *chemin, FILE *repertoires, int *position);
 
 /*
  * Verifie si le repertoire parent d'un fichier ou d'un repertoire existe deja dans le systeme
