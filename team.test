@@ -19,6 +19,10 @@ creation_fichier /main/a1/b1/c1/fichier14.txt Juste un blocasfsdfdf
 creation_fichier /main/a1/b1/c1/fichier15.txt Juste un blocdsfsa
 creation_fichier /main/a1/b1/c1/fichier16.txt Juste un blocasdfsdfasdfadf
 creation_fichier /main/a1/b1/c1/fichier17.txt Juste un blocsdf
+creation_fichier /main/a1/b1/fichier9.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
+creation_fichier /main/a1/b1/fichier14.txt Juste un blocasfsdfdf
+creation_fichier /main/a1/b1/fichier15.txt Juste un blocdsfsa
+creation_fichier /main/a1/b1/fichier17.txt Juste un blocsdf
 creation_fichier /main/a1/b1/c1/fichier18.txt Juste un blocsdfsadafas
 creation_fichier /main/a1/b1/c1/fichier19.txt Juste un blocsdfsadfasfdasfdasdf
 creation_fichier /main/a1/b1/c1/fichier20.txt Juste un blocsdfasfsdfsasdfasdfasdf
@@ -56,3 +60,8 @@ creation_fichier /main/a1/b1/c1/fichier1.txt Cette chaine est suffisamment longu
 lire_fichier /main/a1/b1/c1/fichier1.txt
 suppression_fichier /main/a1/b1/c1/fichier1.txt
 lire_fichier /main/a1/b1/c1/fichier1.txt
+suppression_repertoire /main/a1/b1/c1
+lire_fichier /main/a1/b1/fichier9.txt
+lire_fichier /main/a1/b1/fichier14.txt
+lire_fichier /main/a1/b1/fichier15.txt
+lire_fichier /main/a1/b1/fichier17.txt
