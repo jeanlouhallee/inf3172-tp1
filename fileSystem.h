@@ -188,7 +188,7 @@ bool lireContenu(FILE *operations, char *contenu);
  * @return vrai si le fichier existe
  *         faux sinon
  */
-bool fichierExiste(char *chemin, FILE *inodes, struct inode *inode, int position);
+bool fichierExiste(char *chemin, FILE *inodes, struct inode *inode, int *position);
 
 /*
  * Verifie si le repertoire existe deja dans le systeme
@@ -273,10 +273,10 @@ void disqueEstPlein(int tab[]);
 int prochainBlocLibre(int tab[]);
 
 /*
- * 
+ *
  *
  * @param tab : table de bits indiquant les blocs libres
- * @param inode : 
+ * @param inode :
  *
  * @return void
  */
