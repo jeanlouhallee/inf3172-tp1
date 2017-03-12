@@ -9,3 +9,4 @@ creation_repertoire /r1/r2
 creation_fichier /r1/r2/fichier3 Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 suppression_repertoire /r1
 creation_repertoire /r1/r2/r3
+lire_fichier /r1/r2/fichier3

@@ -459,7 +459,7 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
 
         printf("Nom 2222: %s\n", r.chemin);
 
-        if(memcmp(r.chemin, chemin, longueur) == 0){
+        if(strlen(r.chemin) >= strlen(chemin) && memcmp(r.chemin, chemin, longueur) == 0){
             fgetpos(repertoires, &position);
             suppressionRecursive(repertoires, inodes, disque, tab, r.chemin);
             fsetpos(repertoires, &position);
