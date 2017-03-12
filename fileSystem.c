@@ -318,13 +318,14 @@ char ** fragmenterContenu(const char *contenu, struct inode *inode){
     nbFragments = divisionPlafond(taille, NB_OCTETS);
     inode->nbFragments = nbFragments;
     int reste = taille % (NB_OCTETS);
-    
+
     char **fragments;
     fragments = (char**) malloc(nbFragments*sizeof(char*));
 
     for(int i = 0; i < nbFragments; ++i){
         fragments[i] = (char*) malloc(NB_OCTETS*sizeof(char));
         if(i == nbFragments - 1 && reste != 0){
+            memset(fragments[i], '\0', NB_OCTETS);
             memcpy(fragments[i], contenu + ((NB_OCTETS - 1) * i), reste - 1);
             strcpy(&fragments[i][reste], "\0");
         }else{
@@ -367,7 +368,7 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     return;
 }
 
-void libererBlocs(int tab[], struct inode *inode){   
+void libererBlocs(int tab[], struct inode *inode){
     for(int i = 0; i < inode->nbFragments; ++i){
         if(i < NB_OCTETS){
             clearBit(tab, inode->blocs[i]);
@@ -402,11 +403,11 @@ void suppression(FILE *disque, FILE *inodes, int tab[], char *nom){
 
 void suppressionFichier(FILE *operations, FILE *disque, FILE *inodes, int tab[]){
     char nom[MAX_CHEMIN + 1];
-    
+
     if(lireChemin(operations, nom)){
         suppression(disque, inodes, tab, nom);
     }
-    
+
     return;
 }
 
@@ -471,7 +472,7 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
 
             fsetpos(repertoires, &position);
         }
-        
+
     }
 
     printf("FIN\n" );
@@ -503,7 +504,7 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FI
     if(lireChemin(operations, chemin)){
         suppressionRecursive(repertoires, inodes, disque, tab, chemin);
     }
-    
+
     return;
 }
 
@@ -514,7 +515,6 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
 
     if(lireChemin(operations, nom)){
         if(fichierExiste(nom, inodes, inode, position)){
-            printf("\n\n");
             for(int i = 0; i < inode->nbFragments; ++i){
                 struct bloc *fragment = malloc(sizeof(struct bloc));
                 if(i < NB_OCTETS){
@@ -536,7 +536,7 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
         }
     }
     free(inode);
-
+    printf("\n\n");
     return;
 }
 
