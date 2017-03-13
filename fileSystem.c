@@ -283,37 +283,43 @@ int prochainBlocLibre(int tab[]){
 
 
 void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int tab[]){
-    if(inode->nbFragments >=  NB_BLOCS){
-        inode->indirect = malloc(sizeof(struct indirection));
-    }
+    //if(inode->nbFragments >=  NB_BLOCS){
+    //    inode->indirect = calloc(1, sizeof(struct indirection));
+    //}
 
     fseek(disque, 0, SEEK_SET);
     inode->blocs[0] = inode->id;
-    struct bloc *fragment = malloc(sizeof(struct bloc));
-    memset(fragment->contenu, '\0', NB_OCTETS);
+    struct bloc *fragment = calloc(1, sizeof(struct bloc));
+    //struct bloc *fragment = malloc(sizeof(struct bloc));
+    //memset(fragment->contenu, '\0', NB_OCTETS);
     strcpy(fragment->contenu, fragments[0]);
     fseek(disque, inode->blocs[0] * NB_OCTETS, SEEK_SET);
     fwrite(fragment, sizeof(struct bloc), 1, disque);
     free(fragment);
 
     for(int i = 1; i < inode->nbFragments; ++i){
-        struct bloc *fragment = malloc(sizeof(struct bloc));
-        memset(fragment->contenu, '\0', NB_OCTETS);
+        struct bloc *fragment = calloc(1, sizeof(struct bloc));
+        //struct bloc *fragment = malloc(sizeof(struct bloc));
+        //memset(fragment->contenu, '\0', NB_OCTETS);
         strcpy(fragment->contenu, fragments[i]);
         if(i < NB_BLOCS){
             inode->blocs[i] = prochainBlocLibre(tab);
+            //printf("%d\n", inode->blocs[i]);
             fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
             fwrite(fragment, sizeof(struct bloc), 1, disque);
         }else{
-            inode->indirect->blocs[i - NB_BLOCS] = prochainBlocLibre(tab);
-            fseek(disque, inode->indirect->blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
+            inode->indirect.blocs[i - NB_BLOCS] = prochainBlocLibre(tab);
+            //printf("%d\n", inode->indirect.blocs[i - NB_BLOCS]);
+            fseek(disque, inode->indirect.blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
             fwrite(fragment, sizeof(struct bloc), 1, disque);
         }
         free(fragment);
     }
     fseek(inodes, 0, SEEK_END);
     fwrite(inode, sizeof(struct inode), 1, inodes);
-    free(inode->indirect);
+//    if(inode->nbFragments >=  NB_BLOCS){
+    //    free(inode->indirect);
+//    }
 
     return;
 }
@@ -327,12 +333,12 @@ char ** fragmenterContenu(const char *contenu, struct inode *inode){
     int reste = taille % (NB_OCTETS);
 
     char **fragments;
-    fragments = (char**) malloc(nbFragments*sizeof(char*));
+    fragments = calloc(nbFragments, sizeof(char*));
 
     for(int i = 0; i < nbFragments; ++i){
-        fragments[i] = (char*) malloc(NB_OCTETS*sizeof(char));
+        fragments[i] = calloc(NB_OCTETS, sizeof(char));
         if(i == nbFragments - 1 && reste != 0){
-            memset(fragments[i], '\0', NB_OCTETS);
+            //memset(fragments[i], '\0', NB_OCTETS);
             memcpy(fragments[i], contenu + ((NB_OCTETS - 1) * i), reste - 1);
             strcpy(&fragments[i][reste], "\0");
         }else{
@@ -356,7 +362,7 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
     repertoireParentOk = repertoireParentExiste(nom, repertoires);
 
     if(lireContenu(operations, contenu) && cheminOk && fichierOk && repertoireParentOk){
-        struct inode *i = malloc(sizeof(struct inode));
+        struct inode *i = calloc(1, sizeof(struct inode));
         char ** fragments = fragmenterContenu(contenu, i);
         i->id = prochainBlocLibre(tab);
         strcpy(i->nom, nom);
@@ -380,7 +386,7 @@ void libererBlocs(int tab[], struct inode *inode){
         if(i < NB_OCTETS){
             clearBit(tab, inode->blocs[i]);
         }else{
-            clearBit(tab, inode->indirect->blocs[i - NB_OCTETS]);
+            clearBit(tab, inode->indirect.blocs[i - NB_OCTETS]);
         }
     }
 
@@ -512,6 +518,10 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
     struct inode *inode = malloc(sizeof(struct inode));
     int position = 0;
 
+    //if(inode->nbFragments >=  NB_BLOCS){
+    //    inode->indirect = malloc(sizeof(struct indirection));
+//    }
+
     if(lireChemin(operations, nom)){
         if(fichierExiste(nom, inodes, inode, &position)){
             for(int i = 0; i < inode->nbFragments; ++i){
@@ -521,8 +531,9 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
                     fread(fragment, sizeof(struct bloc), 1, disque);
                     printf("%s", fragment->contenu);
                 }else{
-                    fseek(disque, inode->indirect->blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
-                    fwrite(fragment, sizeof(struct bloc), 1, disque);
+                    //printf("%d\n", inode->indirect.blocs[i - NB_BLOCS]);
+                    fseek(disque, inode->indirect.blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
+                    fread(fragment, sizeof(struct bloc), 1, disque);
                     printf("%s", fragment->contenu);
                 }
                 free(fragment);
@@ -534,6 +545,13 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
             fprintf(stderr, "--Le fichier n'existe pas--\n");
         }
     }
+
+    //if(inode->nbFragments >=  NB_BLOCS){
+        //for(int i = 0; i < 8; ++i){
+            //printf("BLOCS INDIRECTS: %d\n" , inode->indirect->blocs[i]);
+    //    }
+        //free(inode->indirect);
+    //}
     free(inode);
     printf("\n\n");
     return;

@@ -41,6 +41,13 @@ struct repertoire {
 };
 
 /*
+ * Struture representant un bloc d'indirection simple
+ */
+struct indirection {
+    int blocs[NB_BLOCS];
+};
+
+/*
  * Structure representant un i-node
  */
 struct inode {
@@ -48,17 +55,9 @@ struct inode {
     char nom[MAX_CHEMIN + 1];
     int nbFragments;
     int blocs[NB_BLOCS];
-    struct indirection *indirect;
+    struct indirection indirect;
 
 };
-
-/*
- * Struture representant un bloc d'indirection simple
- */
-struct indirection {
-    int blocs[NB_BLOCS];
-};
-
 /*
  * Structure representant un bloc
  */
