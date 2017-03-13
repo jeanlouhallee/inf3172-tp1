@@ -91,11 +91,13 @@ int main(int argc, char *argv[]){
             return EXIT_FAILURE;
         }
     }
+    /**
     for(int i = 0; i < 32000; ++i){
         if(testBit(tab, i) == 1){
-            printf("TABLE DE BITS PAS VIDE\n");
+            printf("TABLE DE BITS PAS VIDE -- %d\n", i);
         }
     }
+    **/
     printf("FIN DU PROGRAMME\n");
     FILE *blocsSauvegarde = fopen(FICHIER_BLOCS, "wb");
     sauvegarderTableBits(tab, blocsSauvegarde);
@@ -281,7 +283,7 @@ int prochainBlocLibre(int tab[]){
 
 
 void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int tab[]){
-    if(inode->nbFragments >  NB_BLOCS){
+    if(inode->nbFragments >=  NB_BLOCS){
         inode->indirect = malloc(sizeof(struct indirection));
     }
 
@@ -298,7 +300,7 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
         struct bloc *fragment = malloc(sizeof(struct bloc));
         memset(fragment->contenu, '\0', NB_OCTETS);
         strcpy(fragment->contenu, fragments[i]);
-        if(i < NB_OCTETS){
+        if(i < NB_BLOCS){
             inode->blocs[i] = prochainBlocLibre(tab);
             fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
             fwrite(fragment, sizeof(struct bloc), 1, disque);
@@ -514,7 +516,7 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
         if(fichierExiste(nom, inodes, inode, &position)){
             for(int i = 0; i < inode->nbFragments; ++i){
                 struct bloc *fragment = malloc(sizeof(struct bloc));
-                if(i < NB_OCTETS){
+                if(i < NB_BLOCS){
                     fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
                     fread(fragment, sizeof(struct bloc), 1, disque);
                     printf("%s", fragment->contenu);
