@@ -1,12 +1,66 @@
-creation_fichier /fichier1 Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
-lire_fichier /fichier1
-suppression_fichier /fichier1
-lire_fichier /fichier1
-creation_fichier /fichier2 Chaine differente.
-lire_fichier /fichier2
-creation_repertoire /r1
-creation_repertoire /r1/r2
-creation_fichier /r1/r2/fichier3 Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
-suppression_repertoire /r1
-creation_repertoire /r1/r2/r3
-lire_fichier /r1/r2/fichier3
+creation_fichier /a1.txt s1
+creation_fichier /a2.txt s2
+creation_fichier /a3.txt s3
+creation_fichier /a4.txt s4
+creation_fichier /a5.txt s5
+creation_fichier /a6.txt s6
+creation_fichier /a7.txt s7
+creation_fichier /a8.txt s8
+creation_fichier /a9.txt s9
+creation_fichier /a10.txt s10
+creation_fichier /a11.txt s11
+creation_fichier /a12.txt s12
+creation_fichier /a13.txt s13
+creation_fichier /a14.txt s14
+creation_fichier /a15.txt s15
+creation_fichier /a16.txt s16
+creation_fichier /a17.txt s17
+creation_fichier /a18.txt s18
+creation_fichier /a19.txt s19
+creation_fichier /a20.txt s20
+creation_fichier /a21.txt s21
+creation_fichier /a22.txt s22
+creation_fichier /a23.txt s23
+creation_fichier /a24.txt s24
+creation_fichier /a25.txt s25
+creation_fichier /a26.txt s26
+creation_fichier /a27.txt s27
+creation_fichier /a28.txt s28
+creation_fichier /a29.txt s29
+creation_fichier /a30.txt s30
+creation_fichier /a31.txt s31
+creation_fichier /a32.txt s32
+creation_fichier /a33.txt s33
+creation_fichier /a34.txt s34
+creation_fichier /a35.txt s35
+creation_fichier /a36.txt s36
+creation_fichier /a37.txt s37
+suppression_fichier /a1.txt
+suppression_fichier /a3.txt
+suppression_fichier /a5.txt
+suppression_fichier /a7.txt
+suppression_fichier /a9.txt
+suppression_fichier /a11.txt
+suppression_fichier /a13.txt
+suppression_fichier /a15.txt
+suppression_fichier /a17.txt
+suppression_fichier /a19.txt
+suppression_fichier /a21.txt
+suppression_fichier /a23.txt
+suppression_fichier /a25.txt
+suppression_fichier /a27.txt
+suppression_fichier /a29.txt
+suppression_fichier /a31.txt
+suppression_fichier /a33.txt
+suppression_fichier /a35.txt
+creation_fichier /long.txt aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+lire_fichier /a2.txt
+lire_fichier /a12.txt
+lire_fichier /a6.txt
+lire_fichier /a4.txt
+lire_fichier /a20.txt
+lire_fichier /a32.txt
+lire_fichier /a18.txt
+lire_fichier /a34.txt
+lire_fichier /a36.txt
+lire_fichier /long.txt

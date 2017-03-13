@@ -255,7 +255,7 @@ bool lireContenu(FILE *operations, char *contenu){
         fprintf(stderr, "--Le fichier ne peut pas etre vide--\n");
         fseek(operations, -(strlen(contenu)), SEEK_CUR);
         return estOK = false;
-    } else if(strlen(contenu) >= MAX_CONTENU){
+    } else if(strlen(contenu) > MAX_CONTENU){
         fprintf(stderr, "--Contenu du fichier trop long--\n");
         fscanf(operations, "%*[^\n]");
         return estOK = false;
@@ -327,8 +327,8 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
 char ** fragmenterContenu(const char *contenu, struct inode *inode){
     int taille = strlen(contenu) - 1;
     int nbFragments = divisionPlafond(taille, NB_OCTETS);
-    taille = taille + nbFragments;
-    nbFragments = divisionPlafond(taille, NB_OCTETS);
+    //taille = taille + nbFragments;
+    //nbFragments = divisionPlafond(taille, NB_OCTETS);
     inode->nbFragments = nbFragments;
     int reste = taille % (NB_OCTETS);
 
@@ -337,13 +337,13 @@ char ** fragmenterContenu(const char *contenu, struct inode *inode){
 
     for(int i = 0; i < nbFragments; ++i){
         fragments[i] = calloc(NB_OCTETS, sizeof(char));
-        if(i == nbFragments - 1 && reste != 0){
+        if(i == nbFragments - 1 && reste  != 0){
             //memset(fragments[i], '\0', NB_OCTETS);
-            memcpy(fragments[i], contenu + ((NB_OCTETS - 1) * i), reste - 1);
-            strcpy(&fragments[i][reste], "\0");
+            memcpy(fragments[i], contenu + ((NB_OCTETS - 1) * i), reste);
+            //strcpy(&fragments[i][reste], "\0");
         }else{
-            memcpy(fragments[i], contenu + ((NB_OCTETS - 1) * i) , NB_OCTETS - 1);
-            strcpy(&fragments[i][NB_OCTETS], "\0");
+            memcpy(fragments[i], contenu + ((NB_OCTETS) * i) , NB_OCTETS);
+            //strcpy(&fragments[i][NB_OCTETS], "\0");
         }
     }
 
@@ -515,7 +515,7 @@ void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FI
 
 void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque){
     char nom[MAX_CHEMIN + 1];
-    struct inode *inode = malloc(sizeof(struct inode));
+    struct inode *inode = calloc(1, sizeof(struct inode));
     int position = 0;
 
     //if(inode->nbFragments >=  NB_BLOCS){
@@ -525,13 +525,12 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
     if(lireChemin(operations, nom)){
         if(fichierExiste(nom, inodes, inode, &position)){
             for(int i = 0; i < inode->nbFragments; ++i){
-                struct bloc *fragment = malloc(sizeof(struct bloc));
+                struct bloc *fragment = calloc(1, sizeof(struct bloc));
                 if(i < NB_BLOCS){
                     fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
                     fread(fragment, sizeof(struct bloc), 1, disque);
                     printf("%s", fragment->contenu);
                 }else{
-                    //printf("%d\n", inode->indirect.blocs[i - NB_BLOCS]);
                     fseek(disque, inode->indirect.blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
                     fread(fragment, sizeof(struct bloc), 1, disque);
                     printf("%s", fragment->contenu);
