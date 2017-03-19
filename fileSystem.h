@@ -51,13 +51,12 @@ struct indirection {
  * Structure representant un i-node
  */
 struct inode {
-    int id;
     char nom[MAX_CHEMIN + 1];
     int nbFragments;
     int blocs[NB_BLOCS];
     struct indirection indirect;
-
 };
+
 /*
  * Structure representant un bloc
  */
@@ -71,6 +70,44 @@ struct bloc {
 //------------//
 
 /*
+ * Cree le repertoire racine s'il n'existe pas deja
+ *
+ * @param repertoires : fichier contenant la liste des repertoires existants
+ *
+ * @return void
+ */
+void creerRepertoireRacine(FILE *repertoires);
+
+
+
+
+
+
+
+
+void lectureOperations(FILE *operations, FILE *disque, FILE *repertoires, FILE *inodes, int *tab);
+
+/*
+ * Charge la table de bits a partir d'un fichier
+ *
+ * @param tab : table de bits indiquant les blocs libres
+ * @param blocs : fichier contenant la table de bits
+ *
+ * @return void
+ */
+void chargerTableBits(int tab[], FILE *blocs);
+
+/*
+ * Sauvegarde la table de bits dans un fichier
+ *
+ * @param tab : table de bits indiquant les blocs libres
+ * @param blocs : fichier contenant la table de bits
+ *
+ * @return void
+ */
+void sauvegarderTableBits(int tab[], FILE *blocs);
+
+/*
  * Cree un fichier
  *
  * @param disque : fichier utilise pour le disque
@@ -81,19 +118,18 @@ struct bloc {
  *
  * @return void
  */
-void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *inodes, int tab[]);
+void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom, char *contenu);
 
 /*
  * Supprime un fichier
  *
- * @param operations : fichier contenant les operations a effectuer
  * @param disque : fichier utilise pour le disque
  * @param inodes : fichier contenant la liste des i-nodes
  * @param tab : table de bits indiquant les blocs libres
  *
  * @return void
  */
-void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, int tab[]);
+void suppressionFichier(FILE *disque, FILE *inodes, int tab[], char *nom);
 
 /*
  * Cree un repertoire
@@ -103,7 +139,7 @@ void suppressionFichier(FILE *operations, FILE *repertoires, FILE *inodes, int t
  *
  * @return void
  */
-void creationRepertoire(FILE *operations, FILE *repertoires);
+void creationRepertoire(FILE *repertoires, char *chemin);
 
 /*
  * Supprime un repertoire et son contenu
@@ -115,11 +151,11 @@ void creationRepertoire(FILE *operations, FILE *repertoires);
  *
  * @return void
  */
-void suppressionRepertoire(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque, int tab[]);
+void suppressionRepertoire(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin);
 
-void suppression();
 
-void suppressionRecursive(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin);
+
+
 
 void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin);
 /*
@@ -131,7 +167,7 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
  *
  * @return void
  */
-void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque);
+void lireFichier(FILE *repertoires, FILE *inodes, FILE *disque, char *nom);
 
 /*
  * Lit un chemin absolu a partir d'un fichier
@@ -212,14 +248,7 @@ bool repertoireExiste(char *chemin, FILE *repertoires, int *position);
  */
 bool repertoireParentExiste(char *chemin, FILE *repertoires);
 
-/*
- * Cree le repertoire racine s'il n'existe pas deja
- *
- * @param repertoires : fichier contenant la liste des repertoires existants
- *
- * @return void
- */
-void creerRepertoireRacine(FILE *repertoires);
+
 
 /*
  * Ecrit sur le disque
@@ -281,25 +310,6 @@ int prochainBlocLibre(int tab[]);
  */
 void libererBlocs(int tab[], struct inode *inode);
 
-/*
- * Charge la table de bits a partir d'un fichier
- *
- * @param tab : table de bits indiquant les blocs libres
- * @param blocs : fichier contenant la table de bits
- *
- * @return void
- */
-void chargerTableBits(int tab[], FILE *blocs);
-
-/*
- * Sauvegarde la table de bits dans un fichier
- *
- * @param tab : table de bits indiquant les blocs libres
- * @param blocs : fichier contenant la table de bits
- *
- * @return void
- */
-void sauvegarderTableBits(int tab[], FILE *blocs);
 
 /*
  * Met le bit a 1
