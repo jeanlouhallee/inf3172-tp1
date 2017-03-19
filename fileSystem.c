@@ -26,6 +26,10 @@ int main(int argc, char *argv[]){
     }
 
     FILE *operations = fopen(argv[1], "r");
+    if(operations == NULL){
+        perror("Erreur d'ouverture de fichier : ");
+        exit(EXIT_FAILURE);
+    }
 
     FILE *disque = fopen(FICHIER_DISQUE, "r");
     if(!disque){
@@ -35,6 +39,10 @@ int main(int argc, char *argv[]){
         fclose(disque);
         disque = fopen(FICHIER_DISQUE, "rb+");
     }
+    if(disque == NULL){
+        perror("Erreur d'ouverture de fichier : ");
+        exit(EXIT_FAILURE);
+    }
 
     FILE *repertoires = fopen(FICHIER_REPERTOIRES, "r");
     if(!repertoires){
@@ -42,6 +50,10 @@ int main(int argc, char *argv[]){
     }else{
         fclose(repertoires);
         repertoires = fopen(FICHIER_REPERTOIRES, "rb+");
+    }
+    if(repertoires == NULL){
+        perror("Erreur d'ouverture de fichier : ");
+        exit(EXIT_FAILURE);
     }
 
     FILE *inodes = fopen(FICHIER_INODES, "r");
@@ -51,8 +63,16 @@ int main(int argc, char *argv[]){
         fclose(inodes);
         inodes = fopen(FICHIER_INODES, "rb+");
     }
+    if(inodes == NULL){
+        perror("Erreur d'ouverture de fichier : ");
+        exit(EXIT_FAILURE);
+    }
 
     FILE *blocsCharge = fopen(FICHIER_BLOCS, "ab+");
+    if(blocsCharge == NULL){
+        perror("Erreur d'ouverture de fichier : ");
+        exit(EXIT_FAILURE);
+    }
     chargerTableBits(tab, blocsCharge);
     fclose(blocsCharge);
 
@@ -63,6 +83,10 @@ int main(int argc, char *argv[]){
     printf("FIN DU PROGRAMME.\n");
 
     FILE *blocsSauvegarde = fopen(FICHIER_BLOCS, "wb");
+    if(blocsSauvegarde == NULL){
+        perror("Erreur d'ouverture de fichier : ");
+        exit(EXIT_FAILURE);
+    }
     sauvegarderTableBits(tab, blocsSauvegarde);
     fclose(blocsSauvegarde);
 
