@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
     int tab[TAB_INT] = {0};
 
     if(argc != 2){
-        fprintf(stderr, "Nom de fichier manquant ou arguments en trop.\n" );
+        fprintf(stderr, "Nom de fichier manquant ou arguments en trop.\n");
         return EXIT_FAILURE;
     }
     FILE *operations = fopen(argv[1], "r");
@@ -100,26 +100,30 @@ int main(int argc, char *argv[]){
 void lectureOperations(FILE *operations, FILE *disque, FILE *repertoires, FILE *inodes, int *tab){
     char operation[MAX_OPERATION];
     char chemin[MAX_CHEMIN + 1];
-    char contenu[MAX_CONTENU + 1];
 
     while(fscanf(operations, "%s", operation) != EOF){
-        if(strcmp(operation, "creation_fichier")  == 0 &&
-                lireChemin(operations, chemin) && (lireContenu(operations, contenu))){
-            creationFicher(disque, repertoires, inodes, tab, chemin, contenu);
-        } else if(strcmp(operation, "suppression_fichier") == 0 &&
-                lireChemin(operations, chemin)){
-            suppressionFichier(repertoires, inodes, tab, chemin);
-        } else if(strcmp(operation, "creation_repertoire") == 0 &&
-                lireChemin(operations, chemin)){
-            creationRepertoire(repertoires, chemin);
-        } else if(strcmp(operation, "suppression_repertoire") == 0 &&
-                lireChemin(operations, chemin)){
-            suppressionRepertoire(repertoires, inodes, disque, tab, chemin);
-        } else if(strcmp(operation, "lire_fichier") == 0 &&
-                lireChemin(operations, chemin)){
-            lireFichier(repertoires, inodes, disque, chemin);
+        if(strcmp(operation, "creation_fichier")  == 0){
+            if(lireChemin(operations, chemin)){
+                creationFicher(operations, disque, repertoires, inodes, tab, chemin);
+            }
+        } else if(strcmp(operation, "suppression_fichier") == 0){
+            if(lireChemin(operations, chemin)){
+                suppressionFichier(repertoires, inodes, tab, chemin);
+            }
+        } else if(strcmp(operation, "creation_repertoire") == 0){
+            if(lireChemin(operations, chemin)){
+                creationRepertoire(repertoires, chemin);
+            }
+        } else if(strcmp(operation, "suppression_repertoire") == 0){
+            if(lireChemin(operations, chemin)){
+                suppressionRepertoire(repertoires, inodes, disque, tab, chemin);
+            }
+        } else if(strcmp(operation, "lire_fichier") == 0){
+            if(lireChemin(operations, chemin)){
+                lireFichier(repertoires, inodes, disque, chemin);
+            }
         } else {
-            fprintf(stderr, "Erreur dans le fichier d'operations." );
+            fprintf(stderr, "Erreur dans le fichier d'operations.\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -192,7 +196,7 @@ bool lireContenu(FILE *operations, char *contenu){
         fprintf(stderr, "Le fichier ne peut pas etre vide.\n");
         fseek(operations, -(strlen(contenu)), SEEK_CUR);
         return estOK = false;
-    } else if(strlen(contenu) >= MAX_CONTENU){
+    } else if(strlen(contenu) > MAX_CONTENU){
         fprintf(stderr, "Contenu du fichier trop long.\n");
         fscanf(operations, "%*[^\n]");
         return estOK = false;
@@ -201,29 +205,32 @@ bool lireContenu(FILE *operations, char *contenu){
     return estOK;
 }
 
-void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom, char *contenu){
+void creationFicher(FILE *operations, FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom){
     int position = 0;
+    char contenu[MAX_CONTENU + 1];
 
-    if(!fichierExiste(nom, inodes, NULL, &position)){
-        if(repertoireParentExiste(nom, repertoires)){
-            struct inode *i = calloc(1, sizeof(struct inode));
-            if(i == NULL){
-                perror("Erreur d'allocation de memoire : ");
-                exit(EXIT_FAILURE);
+    if(lireContenu(operations, contenu)){
+        if(!fichierExiste(nom, inodes, NULL, &position)){
+            if(repertoireParentExiste(nom, repertoires)){
+                struct inode *i = calloc(1, sizeof(struct inode));
+                if(i == NULL){
+                    perror("Erreur d'allocation de memoire : ");
+                    exit(EXIT_FAILURE);
+                }
+                char ** fragments = fragmenterContenu(contenu, i);
+                strcpy(i->nom, nom);
+                ecritureFichier(disque, inodes, fragments, i, tab);
+                for(int j = 0; j < i->nbFragments; ++j){
+                    free(fragments[j]);
+                }
+                free(fragments);
+                free(i);
+            }else{
+                fprintf(stderr, "Le repertoire n'existe pas.\n");
             }
-            char ** fragments = fragmenterContenu(contenu, i);
-            strcpy(i->nom, nom);
-            ecritureFichier(disque, inodes, fragments, i, tab);
-            for(int j = 0; j < i->nbFragments; ++j){
-                free(fragments[j]);
-            }
-            free(fragments);
-            free(i);
         }else{
-            fprintf(stderr, "Le repertoire n'existe pas.\n");
+            fprintf(stderr, "Le fichier existe deja.\n");
         }
-    }else{
-        fprintf(stderr, "Le fichier existe deja.\n");
     }
 
     return;
