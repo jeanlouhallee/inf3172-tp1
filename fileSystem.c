@@ -232,11 +232,8 @@ void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], ch
         fprintf(stderr, "Le fichier existe deja.\n");
     }
 
-
     return;
 }
-
-
 
 void suppressionFichier(FILE *disque, FILE *inodes, int tab[], char *nom){
     int position = 0;
@@ -454,10 +451,26 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
         strcpy(fragment->contenu, fragments[i]);
         if(i < NB_BLOCS){
             inode->blocs[i] = prochainBlocLibre(tab);
+            if(inode->blocs[i] == TAB_BITS && i < (inode->nbFragments - 1)){
+                while(i >= 0){
+                    desactiverBit(tab, inode->blocs[i]);
+                    --i;
+                }
+                fprintf(stderr, "Le fichier est trop volumineux pour l'espace restant sur le disque.\n");
+                return;
+            }
             fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
             fwrite(fragment, sizeof(struct bloc), 1, disque);
         }else{
             inode->indirect.blocs[i - NB_BLOCS] = prochainBlocLibre(tab);
+            if(inode->indirect.blocs[i - NB_BLOCS] == TAB_BITS && i < (inode->nbFragments - 1)){
+                while(i >= 0){
+                    desactiverBit(tab, inode->indirect.blocs[i - NB_BLOCS]);
+                    --i;
+                }
+                fprintf(stderr, "Le fichier est trop volumineux pour l'espace restant sur le disque.\n");
+                return;
+            }
             fseek(disque, inode->indirect.blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
             fwrite(fragment, sizeof(struct bloc), 1, disque);
         }
@@ -517,11 +530,6 @@ int prochainBlocLibre(int tab[]){
         ++i;
     }
     activerBit(tab, i);
-
-    if(i == TAB_BITS){
-        fprintf(stderr, "Le disque est plein: arrêt du programe.\n");
-        exit(EXIT_FAILURE);
-    }
 
     return i;
 }
