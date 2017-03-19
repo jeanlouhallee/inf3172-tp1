@@ -112,6 +112,28 @@ void chargerTableBits(int tab[], FILE *blocs);
 void sauvegarderTableBits(int tab[], FILE *blocs);
 
 /*
+ * Lit un chemin absolu a partir d'un fichier
+ *
+ * @param operations : fichier contenant les operations a effectuer
+ * @param chemin : chemin absolu du fichier ou du repertoire
+ *
+ * @return vrai si un chemin absolu valide a ete lu
+ *         faux si le chemin absolu est trop long
+ */
+bool lireChemin(FILE *operations, char *chemin);
+
+/*
+ * Lit une chaine de caracteres a partir d'un fichier
+ *
+ * @param operations : fichier contenant les operations a effectuer
+ * @param contenu : contenu du fichier
+ *
+ * @return vrai si le contenu du fichier est valide
+ *         faux si le fichier est vide ou trop volumineux
+ */
+bool lireContenu(FILE *operations, char *contenu);
+
+/*
  * Cree un fichier
  *
  * @param disque : fichier utilise pour le disque
@@ -186,49 +208,6 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
 void lireFichier(FILE *repertoires, FILE *inodes, FILE *disque, char *nom);
 
 /*
- * Lit un chemin absolu a partir d'un fichier
- *
- * @param operations : fichier contenant les operations a effectuer
- * @param chemin : chemin absolu du fichier ou du repertoire
- *
- * @return vrai si un chemin absolu valide a ete lu
- *         faux si le chemin absolu est trop long
- */
-bool lireChemin(FILE *operations, char *chemin);
-
-/*
- * Extrait le nom d'un fichier ou d'un repertoire a partir de son chemin absolu
- *
- * @param nom : nom du fichier ou du repertoire
- * @param chemin : chemin absolu du fichier ou du repertoire
- *
- * @return void
- */
-void lireNom(char *nom, char *chemin);
-
-/*
- * Extrait le chemin absolu du repertoire parent d'un fichier ou d'un repertoire
- *
- * @param parent : chemin absolu du repertoire parent
- * @param chemin : chemin absolu du fichier ou du repertoire
- * @param nom : nom du fichier ou du repertoire
- *
- * @return void
- */
-void lireRepertoireParent(char *parent, char *chemin, char *nom);
-
-/*
- * Lit une chaine de caracteres a partir d'un fichier
- *
- * @param operations : fichier contenant les operations a effectuer
- * @param contenu : contenu du fichier
- *
- * @return vrai si le contenu du fichier est valide
- *         faux si le fichier est vide ou trop volumineux
- */
-bool lireContenu(FILE *operations, char *contenu);
-
-/*
  * Verifie si le fichier existe deja dans le systeme
  *
  * @param chemin : chemin absolu du fichier
@@ -264,7 +243,26 @@ bool repertoireExiste(char *chemin, FILE *repertoires, int *position);
  */
 bool repertoireParentExiste(char *chemin, FILE *repertoires);
 
+/*
+ * Extrait le chemin absolu du repertoire parent d'un fichier ou d'un repertoire
+ *
+ * @param parent : chemin absolu du repertoire parent
+ * @param chemin : chemin absolu du fichier ou du repertoire
+ * @param nom : nom du fichier ou du repertoire
+ *
+ * @return void
+ */
+void lireRepertoireParent(char *parent, char *chemin, char *nom);
 
+/*
+ * Extrait le nom d'un fichier ou d'un repertoire a partir de son chemin absolu
+ *
+ * @param nom : nom du fichier ou du repertoire
+ * @param chemin : chemin absolu du fichier ou du repertoire
+ *
+ * @return void
+ */
+void lireNom(char *nom, char *chemin);
 
 /*
  * Ecrit sur le disque
@@ -280,16 +278,6 @@ bool repertoireParentExiste(char *chemin, FILE *repertoires);
 void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int tab[]);
 
 /*
- * Effectue une division et retourne le plafond du resultat
- *
- * @param num : numerateur
- * @param den : denominateur
- *
- * @return un entier, le plafond du resultat de la divison
- */
-int divisionPlafond(int num, int den);
-
-/*
  * Fragmente le contenu d'un fichier en blocs de 16 octets
  *
  * @param contenu : contenu du fichier
@@ -299,13 +287,14 @@ int divisionPlafond(int num, int den);
 char ** fragmenterContenu(const char *contenu, struct inode *inode);
 
 /*
- * Verifie si le disque est plein
+ * Effectue une division et retourne le plafond du resultat
  *
- * @param tab : table de bits indiquant les blocs libres
+ * @param num : numerateur
+ * @param den : denominateur
  *
- * @return void
+ * @return un entier, le plafond du resultat de la divison
  */
-void disqueEstPlein(int tab[]);
+int divisionPlafond(int num, int den);
 
 /*
  * Cherche l'index du prochain bloc libre

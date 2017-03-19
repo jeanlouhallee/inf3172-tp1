@@ -122,18 +122,6 @@ void creerRepertoireRacine(FILE *repertoires){
     return;
 }
 
-int divisionPlafond(int num, int den){
-    int resultat;
-
-    if(num % den != 0){
-        resultat = (num / den) + 1;
-    }else{
-        resultat = num / den;
-    }
-
-    return resultat;
-}
-
 void chargerTableBits(int tab[], FILE *blocs){
     fseek(blocs, 0, SEEK_END);
     if(ftell(blocs) != 0){
@@ -151,77 +139,6 @@ void sauvegarderTableBits(int tab[], FILE *blocs){
     }
 
     return;
-}
-
-bool fichierExiste(char *nom, FILE *inodes, struct inode *inode, int *position){
-    bool existe = false;
-    struct inode buffer;
-
-    fseek(inodes, 0, SEEK_SET);
-    while((fread(&buffer, sizeof(struct inode), 1, inodes) != 0) && !existe){
-        ++(*position);
-        if(strcmp(buffer.nom, nom) == 0){
-            existe = true;
-            if(inode != NULL){
-                memcpy(inode, &buffer, sizeof(struct inode));
-            }
-        }
-    }
-
-    return existe;
-}
-
-bool repertoireExiste(char *chemin, FILE *repertoires, int *position){
-    bool existe = false;
-    struct repertoire buffer;
-
-    fseek(repertoires, 0, SEEK_SET);
-    while((fread(&buffer, sizeof(struct repertoire), 1, repertoires) != 0) && !existe){
-        ++(*position);
-        if(strcmp(buffer.chemin, chemin) == 0){
-            existe = true;
-        }
-    }
-
-    return existe;
-}
-
-void lireNom(char *nom, char *chemin){
-    char *ptrNom;
-
-    ptrNom = strrchr(chemin, '/') + 1;
-    strcpy(nom, ptrNom);
-    //printf("Nom : %s\n", nom);
-
-    return;
-}
-
-void lireRepertoireParent(char *parent, char *chemin, char *nom){
-    int longueur;
-
-    longueur = strlen(chemin) - strlen(nom) - 1;
-    if(longueur == 0){
-        strcpy(parent, "/\0");
-    } else {
-        strncpy(parent, chemin, longueur);
-        parent[longueur] = '\0';
-    }
-    //printf("Repertoire parent : %s\n", parent);
-
-    return;
-}
-
-bool repertoireParentExiste(char *chemin, FILE *repertoires){
-    bool existe = false;
-    char repertoireParent[MAX_CHEMIN + 1];
-    char nom[MAX_CHEMIN + 1];
-    int position = 0;
-
-    lireNom(nom, chemin);
-    lireRepertoireParent(repertoireParent, chemin, nom);
-    existe = repertoireExiste(repertoireParent, repertoires, &position);
-
-    return existe;
 }
 
 bool lireChemin(FILE *operations, char *chemin){
@@ -264,22 +181,212 @@ bool lireContenu(FILE *operations, char *contenu){
     return estOK;
 }
 
+void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom, char *contenu){
+    int position = 0;
 
-int prochainBlocLibre(int tab[]){
-    int i = 0;
-    while(testerBit(tab, i) == 1 && i < TAB_BITS){
-        ++i;
+    if(!fichierExiste(nom, inodes, NULL, &position)){
+        if(repertoireParentExiste(nom, repertoires)){
+            struct inode *i = calloc(1, sizeof(struct inode));
+            char ** fragments = fragmenterContenu(contenu, i);
+            strcpy(i->nom, nom);
+            ecritureFichier(disque, inodes, fragments, i, tab);
+            for(int j = 0; j < i->nbFragments; ++j){
+                free(fragments[j]);
+            }
+            free(fragments);
+            free(i);
+        }else{
+            fprintf(stderr, "Le repertoire n'existe pas.\n");
+        }
+    }else{
+        fprintf(stderr, "Le fichier existe deja.\n");
     }
-    activerBit(tab, i);
 
-    if(i == TAB_BITS){
-        fprintf(stderr, "Le disque est plein: arrêt du programe.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    return i;
+    return;
 }
 
+
+
+void suppressionFichier(FILE *disque, FILE *inodes, int tab[], char *nom){
+    struct inode *inode = malloc(sizeof(struct inode));
+    int position = 0;
+
+    if(fichierExiste(nom, inodes, inode, &position)){
+        libererBlocs(tab, inode);
+        struct inode *inodeVide = malloc(sizeof(struct inode));
+        memset(inodeVide->nom, '\0', MAX_CHEMIN + 1);
+        fseek(inodes, (position  - 1) * sizeof(struct inode), SEEK_SET);
+        fwrite(inodeVide, sizeof(struct inode), 1, inodes);
+        free(inodeVide);
+    } else {
+        fprintf(stderr, "Le fichier n'existe pas.\n");
+    }
+    free(inode);
+
+    return;
+}
+
+void creationRepertoire(FILE *repertoires, char *chemin){
+    int position = 0;
+
+    if(repertoireParentExiste(chemin, repertoires)){
+        if(!repertoireExiste(chemin, repertoires, &position)){
+            struct repertoire *r = malloc(sizeof(struct repertoire));
+            strcpy(r->chemin, chemin);
+            fseek(repertoires, 0, SEEK_END);
+            fwrite(r, sizeof(struct repertoire), 1, repertoires);
+            free(r);
+        } else {
+            fprintf(stderr, "Le repertoire existe deja.\n");
+        }
+    } else {
+        fprintf(stderr, "Le repertoire parent n'existe pas.\n");
+    }
+
+    return;
+}
+
+void suppressionRepertoire(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin){
+    int position = 0;
+
+    if(repertoireExiste(chemin, repertoires, &position)){
+        struct repertoire *r = malloc(sizeof(struct repertoire));
+        memset(r->chemin, '\0', MAX_CHEMIN + 1);
+        fseek(repertoires, (position - 1) * sizeof(struct repertoire), SEEK_SET);
+        fwrite(r, sizeof(struct repertoire), 1, repertoires);
+        free(r);
+
+        suppressionContenu(repertoires, inodes, disque, tab, chemin);
+    } else {
+        fprintf(stderr, "Le repertoire n'existe pas.\n");
+    }
+
+    return;
+}
+
+void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin){
+    struct inode i;
+    struct repertoire r;
+    int longueur = strlen(chemin);
+    fpos_t position;
+
+    fseek(inodes, 0, SEEK_SET);
+    while((fread(&i, sizeof(struct inode), 1, inodes)) != 0){
+        if(strlen(i.nom) >= longueur && memcmp(i.nom, chemin, longueur) == 0){
+            fgetpos(inodes, &position);
+            suppressionFichier(disque, inodes, tab, i.nom);
+            fsetpos(inodes, &position);
+        }
+    }
+    fseek(repertoires, 0, SEEK_SET);
+    while((fread(&r, sizeof(struct repertoire), 1, repertoires)) != 0){
+        if(strlen(r.chemin) >= longueur && memcmp(r.chemin, chemin, longueur) == 0){
+            fgetpos(repertoires, &position);
+            suppressionRepertoire(repertoires, inodes, disque, tab, r.chemin);
+            fsetpos(repertoires, &position);
+        }
+
+    }
+
+    return;
+}
+
+void lireFichier(FILE *repertoires, FILE *inodes, FILE *disque, char *nom){
+    struct inode *inode = calloc(1, sizeof(struct inode));
+    int position = 0;
+
+    if(fichierExiste(nom, inodes, inode, &position)){
+        for(int i = 0; i < inode->nbFragments; ++i){
+            struct bloc *fragment = calloc(1, sizeof(struct bloc));
+            if(i < NB_BLOCS){
+                fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
+                fread(fragment, sizeof(struct bloc), 1, disque);
+                printf("%s", fragment->contenu);
+            }else{
+                fseek(disque, inode->indirect.blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
+                fread(fragment, sizeof(struct bloc), 1, disque);
+                printf("%s", fragment->contenu);
+            }
+            free(fragment);
+        }
+    } else {
+        fprintf(stderr, "Le fichier n'existe pas.\n");
+    }
+    free(inode);
+
+    return;
+}
+
+bool fichierExiste(char *nom, FILE *inodes, struct inode *inode, int *position){
+    bool existe = false;
+    struct inode buffer;
+
+    fseek(inodes, 0, SEEK_SET);
+    while((fread(&buffer, sizeof(struct inode), 1, inodes) != 0) && !existe){
+        ++(*position);
+        if(strcmp(buffer.nom, nom) == 0){
+            existe = true;
+            if(inode != NULL){
+                memcpy(inode, &buffer, sizeof(struct inode));
+            }
+        }
+    }
+
+    return existe;
+}
+
+bool repertoireExiste(char *chemin, FILE *repertoires, int *position){
+    bool existe = false;
+    struct repertoire buffer;
+
+    fseek(repertoires, 0, SEEK_SET);
+    while((fread(&buffer, sizeof(struct repertoire), 1, repertoires) != 0) && !existe){
+        ++(*position);
+        if(strcmp(buffer.chemin, chemin) == 0){
+            existe = true;
+        }
+    }
+
+    return existe;
+}
+
+bool repertoireParentExiste(char *chemin, FILE *repertoires){
+    bool existe = false;
+    char repertoireParent[MAX_CHEMIN + 1];
+    char nom[MAX_CHEMIN + 1];
+    int position = 0;
+
+    lireNom(nom, chemin);
+    lireRepertoireParent(repertoireParent, chemin, nom);
+    existe = repertoireExiste(repertoireParent, repertoires, &position);
+
+    return existe;
+}
+
+void lireRepertoireParent(char *parent, char *chemin, char *nom){
+    int longueur;
+
+    longueur = strlen(chemin) - strlen(nom) - 1;
+    if(longueur == 0){
+        strcpy(parent, "/\0");
+    } else {
+        strncpy(parent, chemin, longueur);
+        parent[longueur] = '\0';
+    }
+    //printf("Repertoire parent : %s\n", parent);
+
+    return;
+}
+
+void lireNom(char *nom, char *chemin){
+    char *ptrNom;
+
+    ptrNom = strrchr(chemin, '/') + 1;
+    strcpy(nom, ptrNom);
+    //printf("Nom : %s\n", nom);
+
+    return;
+}
 
 void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode *inode, int tab[]){
     fseek(disque, 0, SEEK_SET);
@@ -325,29 +432,31 @@ char ** fragmenterContenu(const char *contenu, struct inode *inode){
     return fragments;
 }
 
+int divisionPlafond(int num, int den){
+    int resultat;
 
-void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom, char *contenu){
-    int position = 0;
-
-    if(!fichierExiste(nom, inodes, NULL, &position)){
-        if(repertoireParentExiste(nom, repertoires)){
-            struct inode *i = calloc(1, sizeof(struct inode));
-            char ** fragments = fragmenterContenu(contenu, i);
-            strcpy(i->nom, nom);
-            ecritureFichier(disque, inodes, fragments, i, tab);
-            for(int j = 0; j < i->nbFragments; ++j){
-                free(fragments[j]);
-            }
-            free(fragments);
-            free(i);
-        }else{
-            fprintf(stderr, "Le repertoire n'existe pas.\n");
-        }
+    if(num % den != 0){
+        resultat = (num / den) + 1;
     }else{
-        fprintf(stderr, "Le fichier existe deja.\n");
+        resultat = num / den;
     }
 
-    return;
+    return resultat;
+}
+
+int prochainBlocLibre(int tab[]){
+    int i = 0;
+    while(testerBit(tab, i) == 1 && i < TAB_BITS){
+        ++i;
+    }
+    activerBit(tab, i);
+
+    if(i == TAB_BITS){
+        fprintf(stderr, "Le disque est plein: arrêt du programe.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return i;
 }
 
 void libererBlocs(int tab[], struct inode *inode){
@@ -358,116 +467,6 @@ void libererBlocs(int tab[], struct inode *inode){
             desactiverBit(tab, inode->indirect.blocs[i - NB_OCTETS]);
         }
     }
-
-    return;
-}
-
-void suppressionFichier(FILE *disque, FILE *inodes, int tab[], char *nom){
-    struct inode *inode = malloc(sizeof(struct inode));
-    int position = 0;
-
-    if(fichierExiste(nom, inodes, inode, &position)){
-        libererBlocs(tab, inode);
-        struct inode *inodeVide = malloc(sizeof(struct inode));
-        memset(inodeVide->nom, '\0', MAX_CHEMIN + 1);
-        fseek(inodes, (position  - 1) * sizeof(struct inode), SEEK_SET);
-        fwrite(inodeVide, sizeof(struct inode), 1, inodes);
-        free(inodeVide);
-    } else {
-        fprintf(stderr, "Le fichier n'existe pas.\n");
-    }
-    free(inode);
-
-    return;
-}
-
-void creationRepertoire(FILE *repertoires, char *chemin){
-    int position = 0;
-
-    if(repertoireParentExiste(chemin, repertoires)){
-        if(!repertoireExiste(chemin, repertoires, &position)){
-            struct repertoire *r = malloc(sizeof(struct repertoire));
-            strcpy(r->chemin, chemin);
-            fseek(repertoires, 0, SEEK_END);
-            fwrite(r, sizeof(struct repertoire), 1, repertoires);
-            free(r);
-        } else {
-            fprintf(stderr, "Le repertoire existe deja.\n");
-        }
-    } else {
-        fprintf(stderr, "Le repertoire parent n'existe pas.\n");
-    }
-
-    return;
-}
-
-void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin){
-    struct inode i;
-    struct repertoire r;
-    int longueur = strlen(chemin);
-    fpos_t position;
-
-    fseek(inodes, 0, SEEK_SET);
-    while((fread(&i, sizeof(struct inode), 1, inodes)) != 0){
-        if(strlen(i.nom) >= longueur && memcmp(i.nom, chemin, longueur) == 0){
-            fgetpos(inodes, &position);
-            suppressionFichier(disque, inodes, tab, i.nom);
-            fsetpos(inodes, &position);
-        }
-    }
-    fseek(repertoires, 0, SEEK_SET);
-    while((fread(&r, sizeof(struct repertoire), 1, repertoires)) != 0){
-        if(strlen(r.chemin) >= longueur && memcmp(r.chemin, chemin, longueur) == 0){
-            fgetpos(repertoires, &position);
-            suppressionRepertoire(repertoires, inodes, disque, tab, r.chemin);
-            fsetpos(repertoires, &position);
-        }
-
-    }
-
-    return;
-}
-
-void suppressionRepertoire(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin){
-    int position = 0;
-
-    if(repertoireExiste(chemin, repertoires, &position)){
-        struct repertoire *r = malloc(sizeof(struct repertoire));
-        memset(r->chemin, '\0', MAX_CHEMIN + 1);
-        fseek(repertoires, (position - 1) * sizeof(struct repertoire), SEEK_SET);
-        fwrite(r, sizeof(struct repertoire), 1, repertoires);
-        free(r);
-
-        suppressionContenu(repertoires, inodes, disque, tab, chemin);
-    } else {
-        fprintf(stderr, "Le repertoire n'existe pas.\n");
-    }
-
-    return;
-}
-
-void lireFichier(FILE *repertoires, FILE *inodes, FILE *disque, char *nom){
-    struct inode *inode = calloc(1, sizeof(struct inode));
-    int position = 0;
-
-    if(fichierExiste(nom, inodes, inode, &position)){
-        for(int i = 0; i < inode->nbFragments; ++i){
-            struct bloc *fragment = calloc(1, sizeof(struct bloc));
-            if(i < NB_BLOCS){
-                fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
-                fread(fragment, sizeof(struct bloc), 1, disque);
-                printf("%s", fragment->contenu);
-            }else{
-                fseek(disque, inode->indirect.blocs[i - NB_BLOCS] * NB_OCTETS, SEEK_SET);
-                fread(fragment, sizeof(struct bloc), 1, disque);
-                printf("%s", fragment->contenu);
-            }
-            free(fragment);
-        }
-    } else {
-        fprintf(stderr, "Le fichier n'existe pas.\n");
-    }
-    free(inode);
 
     return;
 }
