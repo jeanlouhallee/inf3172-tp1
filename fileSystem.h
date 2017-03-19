@@ -27,7 +27,8 @@
 #define FICHIER_REPERTOIRES "repertoires" // Nom du fichier contenant la liste les des repertoires
 #define FICHIER_INODES "inodes" // Nom du fichier contenant les inodes
 #define FICHIER_BLOCS "blocs" // Nom du fichier contenant la table des blocs libres
-
+#define CREER_FIC "wb+" // Mode d'ouverture du fichier s'il n'existe pas deja
+#define METTREAJOUR_FIC "rb+" // Mode d'ouverture du fichier s'il exite deja
 
 //-----------------------//
 // Structures de donnees //

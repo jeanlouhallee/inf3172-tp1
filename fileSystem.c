@@ -24,7 +24,6 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Nom de fichier manquant ou arguments en trop.\n" );
         return EXIT_FAILURE;
     }
-
     FILE *operations = fopen(argv[1], "r");
     if(operations == NULL){
         perror("Erreur d'ouverture de fichier : ");
@@ -33,11 +32,11 @@ int main(int argc, char *argv[]){
 
     FILE *disque = fopen(FICHIER_DISQUE, "r");
     if(!disque){
-        disque = fopen(FICHIER_DISQUE, "wb+");
+        disque = fopen(FICHIER_DISQUE, CREER_FIC);
         ftruncate(fileno(disque), TAILLE_DISQUE);
     }else{
         fclose(disque);
-        disque = fopen(FICHIER_DISQUE, "rb+");
+        disque = fopen(FICHIER_DISQUE, METTREAJOUR_FIC);
     }
     if(disque == NULL){
         perror("Erreur d'ouverture de fichier : ");
@@ -46,10 +45,10 @@ int main(int argc, char *argv[]){
 
     FILE *repertoires = fopen(FICHIER_REPERTOIRES, "r");
     if(!repertoires){
-        repertoires = fopen(FICHIER_REPERTOIRES, "wb+");
+        repertoires = fopen(FICHIER_REPERTOIRES, CREER_FIC);
     }else{
         fclose(repertoires);
-        repertoires = fopen(FICHIER_REPERTOIRES, "rb+");
+        repertoires = fopen(FICHIER_REPERTOIRES, METTREAJOUR_FIC);
     }
     if(repertoires == NULL){
         perror("Erreur d'ouverture de fichier : ");
@@ -58,10 +57,10 @@ int main(int argc, char *argv[]){
 
     FILE *inodes = fopen(FICHIER_INODES, "r");
     if(!inodes){
-        inodes = fopen(FICHIER_INODES, "wb+");
+        inodes = fopen(FICHIER_INODES, CREER_FIC);
     }else{
         fclose(inodes);
-        inodes = fopen(FICHIER_INODES, "rb+");
+        inodes = fopen(FICHIER_INODES, METTREAJOUR_FIC);
     }
     if(inodes == NULL){
         perror("Erreur d'ouverture de fichier : ");
@@ -79,8 +78,6 @@ int main(int argc, char *argv[]){
     creerRepertoireRacine(repertoires);
 
     lectureOperations(operations, disque, repertoires, inodes, tab);
-    
-    printf("FIN DU PROGRAMME.\n");
 
     FILE *blocsSauvegarde = fopen(FICHIER_BLOCS, "wb");
     if(blocsSauvegarde == NULL){
@@ -89,6 +86,8 @@ int main(int argc, char *argv[]){
     }
     sauvegarderTableBits(tab, blocsSauvegarde);
     fclose(blocsSauvegarde);
+
+    printf("FIN DU PROGRAMME.\n");
 
     fclose(operations);
     fclose(disque);
@@ -104,26 +103,21 @@ void lectureOperations(FILE *operations, FILE *disque, FILE *repertoires, FILE *
     char contenu[MAX_CONTENU + 1];
 
     while(fscanf(operations, "%s", operation) != EOF){
-        if(strcmp(operation, "creation_fichier")  == 0 && lireChemin(operations, chemin) && (lireContenu(operations, contenu))){
-            printf("creation de fichier.\n");
+        if(strcmp(operation, "creation_fichier")  == 0 &&
+                lireChemin(operations, chemin) && (lireContenu(operations, contenu))){
             creationFicher(disque, repertoires, inodes, tab, chemin, contenu);
-            printf("\n");
-        } else if(strcmp(operation, "suppression_fichier") == 0 && lireChemin(operations, chemin)){
-            printf("suppression de fichier.\n");
+        } else if(strcmp(operation, "suppression_fichier") == 0 &&
+                lireChemin(operations, chemin)){
             suppressionFichier(repertoires, inodes, tab, chemin);
-            printf("\n");
-        } else if(strcmp(operation, "creation_repertoire") == 0 && lireChemin(operations, chemin)){
-            printf("creation de repertoire.\n");
+        } else if(strcmp(operation, "creation_repertoire") == 0 &&
+                lireChemin(operations, chemin)){
             creationRepertoire(repertoires, chemin);
-            printf("\n");
-        } else if(strcmp(operation, "suppression_repertoire") == 0 && lireChemin(operations, chemin)){
-            printf("suppression de repertoire.\n");
+        } else if(strcmp(operation, "suppression_repertoire") == 0 &&
+                lireChemin(operations, chemin)){
             suppressionRepertoire(repertoires, inodes, disque, tab, chemin);
-            printf("\n");
-        } else if(strcmp(operation, "lire_fichier") == 0 && lireChemin(operations, chemin)){
-            printf("lecture de fichier.\n");
+        } else if(strcmp(operation, "lire_fichier") == 0 &&
+                lireChemin(operations, chemin)){
             lireFichier(repertoires, inodes, disque, chemin);
-            printf("\n");
         } else {
             fprintf(stderr, "Erreur dans le fichier d'operations." );
             exit(EXIT_FAILURE);
@@ -174,7 +168,6 @@ bool lireChemin(FILE *operations, char *chemin){
 
     memset(chemin, '\0', MAX_CHEMIN + 1);
     fscanf(operations, "%41s", chemin);
-    //printf("Chemin : %s\n", chemin);
 
     if(strlen(chemin) >= MAX_CHEMIN){
         fprintf(stderr, "Chemin absolu trop long.\n");
@@ -204,7 +197,6 @@ bool lireContenu(FILE *operations, char *contenu){
         fscanf(operations, "%*[^\n]");
         return estOK = false;
     }
-    // printf("Contenu : %s", contenu);
 
     return estOK;
 }
@@ -431,7 +423,6 @@ void lireRepertoireParent(char *parent, char *chemin, char *nom){
         strncpy(parent, chemin, longueur);
         parent[longueur] = '\0';
     }
-    //printf("Repertoire parent : %s\n", parent);
 
     return;
 }
@@ -441,7 +432,6 @@ void lireNom(char *nom, char *chemin){
 
     ptrNom = strrchr(chemin, '/') + 1;
     strcpy(nom, ptrNom);
-    //printf("Nom : %s\n", nom);
 
     return;
 }
