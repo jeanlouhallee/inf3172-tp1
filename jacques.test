@@ -5171,4 +5171,8 @@ creation_fichier /main/a12/b10/c7/fichier2.txt Cette chaine est suffisamment lon
 creation_fichier /main/a12/b10/c7/fichier3.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 creation_fichier /main/a12/b10/c7/fichier4.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 creation_fichier /main/a12/b10/c7/fichier5.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
-suppression_repertoire /main
+lire_fichier  /main/a12/b10/c7/fichier1.txt
+lire_fichier  /main/a12/b10/c7/fichier2.txt
+lire_fichier  /main/a12/b10/c7/fichier3.txt
+lire_fichier  /main/a12/b10/c7/fichier4.txt
+lire_fichier  /main/a12/b10/c7/fichier5.txt

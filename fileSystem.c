@@ -245,7 +245,7 @@ bool lireContenu(FILE *operations, char *contenu){
         fprintf(stderr, "Le fichier ne peut pas etre vide.\n");
         fseek(operations, -(strlen(contenu)), SEEK_CUR);
         return estOK = false;
-    } else if(strlen(contenu) > MAX_CONTENU){
+    } else if(strlen(contenu) >= MAX_CONTENU){
         fprintf(stderr, "Contenu du fichier trop long.\n");
         fscanf(operations, "%*[^\n]");
         return estOK = false;
@@ -258,10 +258,10 @@ bool lireContenu(FILE *operations, char *contenu){
 
 int prochainBlocLibre(int tab[]){
     int i = 0;
-    while(testBit(tab, i) == 1 && i < TAB_BITS){
+    while(testerBit(tab, i) == 1 && i < TAB_BITS){
         ++i;
     }
-    setBit(tab, i);
+    activerBit(tab, i);
 
     if(i == TAB_BITS){
         fprintf(stderr, "Le disque est plein: arrêt du programe.\n");
@@ -357,9 +357,9 @@ void creationFicher(FILE *disque, FILE *operations, FILE *repertoires, FILE *ino
 void libererBlocs(int tab[], struct inode *inode){
     for(int i = 0; i < inode->nbFragments; ++i){
         if(i < NB_OCTETS){
-            clearBit(tab, inode->blocs[i]);
+            desactiverBit(tab, inode->blocs[i]);
         }else{
-            clearBit(tab, inode->indirect.blocs[i - NB_OCTETS]);
+            desactiverBit(tab, inode->indirect.blocs[i - NB_OCTETS]);
         }
     }
 
@@ -499,16 +499,16 @@ void lireFichier(FILE *operations, FILE *repertoires, FILE *inodes, FILE *disque
     return;
 }
 
-void setBit(int tab[],  int index){
+void activerBit(int tab[],  int index){
     tab[index / TAILLE_INT] |= 1 << (index % TAILLE_INT);
     return;
 }
 
-int testBit(int tab[],  int index){
+int testerBit(int tab[],  int index){
     return ((tab[index / TAILLE_INT] & (1 << (index % TAILLE_INT))) != 0);
 }
 
-void clearBit(int tab[],  int index){
+void desactiverBit(int tab[],  int index){
     tab[index / TAILLE_INT] &= ~(1 << (index % TAILLE_INT));
     return;
  }

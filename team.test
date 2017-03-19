@@ -56,6 +56,8 @@ lire_fichier /main/a1/b1/c1/fichier1.txt
 lire_fichier /main/a1/b1/c1/fichier18.txt
 creation_fichier /main/a1/b1/c1/fichier1.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 lire_fichier /main/a1/b1/c1/fichier1.txt
+creation_fichier /main/a1/fichier6.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
+creation_fichier /main/a1/fichier7.txt Cette chaine est suffisamment longue pour avoir besoin de plusieurs blocs.
 suppression_fichier /main/a1/b1/c1/fichier1.txt
 lire_fichier /main/a1/b1/c1/fichier1.txt
 suppression_repertoire /main/a1/b1/c1
@@ -63,4 +65,4 @@ lire_fichier /main/a1/b1/fichier9.txt
 lire_fichier /main/a1/b1/fichier14.txt
 lire_fichier /main/a1/b1/fichier15.txt
 lire_fichier /main/a1/b1/fichier17.txt
-suppression_repertoire /main
+suppression_repertoire /main/a1/b1

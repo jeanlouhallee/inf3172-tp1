@@ -309,7 +309,7 @@ void sauvegarderTableBits(int tab[], FILE *blocs);
  *
  * @return void
  */
-void  setBit(int tab[],  int index);
+void  activerBit(int tab[],  int index);
 
 /*
  * Met le bit a 0
@@ -319,7 +319,7 @@ void  setBit(int tab[],  int index);
  *
  * @return void
  */
-void  clearBit(int tab[],  int index);
+void  desactiverBit(int tab[],  int index);
 
 /*
  * Verifie la valeur d'un bit dans une table
@@ -329,4 +329,4 @@ void  clearBit(int tab[],  int index);
  *
  * @return un entier, la valeur du bit
  */
-int testBit(int tab[],  int index);
+int testerBit(int tab[],  int index);
