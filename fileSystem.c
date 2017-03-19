@@ -100,11 +100,13 @@ int main(int argc, char *argv[]){
 void lectureOperations(FILE *operations, FILE *disque, FILE *repertoires, FILE *inodes, int *tab){
     char operation[MAX_OPERATION];
     char chemin[MAX_CHEMIN + 1];
+    char contenu[MAX_CONTENU + 1];
 
     while(fscanf(operations, "%s", operation) != EOF){
         if(strcmp(operation, "creation_fichier")  == 0){
-            if(lireChemin(operations, chemin)){
-                creationFicher(operations, disque, repertoires, inodes, tab, chemin);
+            bool cheminOK = lireChemin(operations, chemin);
+            if(lireContenu(operations, contenu) && cheminOK){
+                creationFicher(disque, repertoires, inodes, tab, chemin, contenu);
             }
         } else if(strcmp(operation, "suppression_fichier") == 0){
             if(lireChemin(operations, chemin)){
@@ -205,33 +207,31 @@ bool lireContenu(FILE *operations, char *contenu){
     return estOK;
 }
 
-void creationFicher(FILE *operations, FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom){
+void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom, char *contenu){
     int position = 0;
-    char contenu[MAX_CONTENU + 1];
 
-    if(lireContenu(operations, contenu)){
-        if(!fichierExiste(nom, inodes, NULL, &position)){
-            if(repertoireParentExiste(nom, repertoires)){
-                struct inode *i = calloc(1, sizeof(struct inode));
-                if(i == NULL){
-                    perror("Erreur d'allocation de memoire : ");
-                    exit(EXIT_FAILURE);
-                }
-                char ** fragments = fragmenterContenu(contenu, i);
-                strcpy(i->nom, nom);
-                ecritureFichier(disque, inodes, fragments, i, tab);
-                for(int j = 0; j < i->nbFragments; ++j){
-                    free(fragments[j]);
-                }
-                free(fragments);
-                free(i);
-            }else{
-                fprintf(stderr, "Le repertoire n'existe pas.\n");
+    if(!fichierExiste(nom, inodes, NULL, &position)){
+        if(repertoireParentExiste(nom, repertoires)){
+            struct inode *i = calloc(1, sizeof(struct inode));
+            if(i == NULL){
+                perror("Erreur d'allocation de memoire : ");
+                exit(EXIT_FAILURE);
             }
+            char ** fragments = fragmenterContenu(contenu, i);
+            strcpy(i->nom, nom);
+            ecritureFichier(disque, inodes, fragments, i, tab);
+            for(int j = 0; j < i->nbFragments; ++j){
+                free(fragments[j]);
+            }
+            free(fragments);
+            free(i);
         }else{
-            fprintf(stderr, "Le fichier existe deja.\n");
+            fprintf(stderr, "Le repertoire n'existe pas.\n");
         }
+    }else{
+        fprintf(stderr, "Le fichier existe deja.\n");
     }
+
 
     return;
 }

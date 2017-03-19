@@ -137,16 +137,16 @@ bool lireContenu(FILE *operations, char *contenu);
 /*
  * Cree un fichier
  *
- * @param operations : fichier contenant les operations a effectuer
  * @param disque : fichier utilise pour le disque
  * @param repertoires : fichier contenant la liste des repertoires existants
  * @param inodes : fichier contenant la liste des i-nodes
  * @param tab : table de bits indiquant les blocs libres
  * @param nom : nom du fichier a creer
+ * @param contenu : contenu du fichier a creer
  *
  * @return void
  */
-void creationFicher(FILE *operations, FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom);
+void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], char *nom, char *contenu);
 
 /*
  * Supprime un fichier

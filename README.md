@@ -26,7 +26,6 @@ Les opérations possibles sont :
 * `suppression_fichier <nom du fichier>` : Permet de supprimer un fichier.
 * `lire_fichier <nom du fichier>` : Permet d'afficher le contenu du fichier à l'écran.
 
-
 ## Contenu du projet
 
 * fileSystem.h : Fichier d'entête où sont définis les constantes, les structures et les prototypes.
