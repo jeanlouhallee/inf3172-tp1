@@ -6,7 +6,7 @@
  * Auteurs : Etienne Bergeron BERE08089101
  *           Jean-Lou Hallee  HALJ05129309
  *
- * Dernières modifications : 12 mars 2017
+ * Dernières modifications : 19 mars 2017
  */
 
 
@@ -78,13 +78,17 @@ struct bloc {
  */
 void creerRepertoireRacine(FILE *repertoires);
 
-
-
-
-
-
-
-
+/*
+ * Lis les operations a partir du fichier d'operations et les execute
+ *
+ * @param operations : fichier contenant les operations a executer
+ * @param  disque : fichier utilise pour le disque
+ * @param repertoires : fichier contenant la liste des repertoires existants
+ * @param inodes : fichier contenant la liste des i-nodes
+ * @param tab : table de bits indiquant les blocs libres
+ *
+ * @return void
+ */
 void lectureOperations(FILE *operations, FILE *disque, FILE *repertoires, FILE *inodes, int *tab);
 
 /*
@@ -111,10 +115,11 @@ void sauvegarderTableBits(int tab[], FILE *blocs);
  * Cree un fichier
  *
  * @param disque : fichier utilise pour le disque
- * @param operations : fichier contenant les operations a effectuer
  * @param repertoires : fichier contenant la liste des repertoires existants
  * @param inodes : fichier contenant la liste des i-nodes
  * @param tab : table de bits indiquant les blocs libres
+ * @param nom : nom du fichier a creer
+  * @param contenu : contenu du fichier a creer
  *
  * @return void
  */
@@ -126,6 +131,7 @@ void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], ch
  * @param disque : fichier utilise pour le disque
  * @param inodes : fichier contenant la liste des i-nodes
  * @param tab : table de bits indiquant les blocs libres
+  * @param nom : nom du fichier a supprimer
  *
  * @return void
  */
@@ -134,8 +140,8 @@ void suppressionFichier(FILE *disque, FILE *inodes, int tab[], char *nom);
 /*
  * Cree un repertoire
  *
- * @param operations : fichier contenant les operations a effectuer
  * @param repertoires : fichier contenant la liste des repertoires existants
+  * @param chemin : chemin du repertoire a creer
  *
  * @return void
  */
@@ -144,26 +150,36 @@ void creationRepertoire(FILE *repertoires, char *chemin);
 /*
  * Supprime un repertoire et son contenu
  *
- * @param operations : fichier contenant les operations a effectuer
  * @param repertoires : fichier contenant la liste des repertoires existants
  * @param inodes : fichier contenant la liste des i-nodes
+ * @param disque : fichier utilise pour le disque
  * @param tab : table de bits indiquant les blocs libres
+ * @param chemin : chemin du repertoire a supprimer
  *
  * @return void
  */
 void suppressionRepertoire(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin);
 
-
-
-
-
+/*
+ * Supprime le contenu d'un repertoire
+ *
+ * @param repertoires : fichier contenant la liste des repertoires existants
+ * @param inodes : fichier contenant la liste des i-nodes
+ * @param disque : fichier utilise pour le disque
+ * @param tab : table de bits indiquant les blocs libres
+ * @param chemin : chemin du repertoire a supprimer
+ *
+ * @return void
+ */
 void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[], char *chemin);
+
 /*
  * Affiche le contenu d'un fichier
  *
- * @param operations : fichier contenant les operations a effectuer
  * @param repertoires : fichier contenant la liste des repertoires existants
  * @param inodes : fichier contenant la liste des i-nodes
+ * @param disque : fichier utilise pour le disque
+ * @param nom : nom du fichier a lire
  *
  * @return void
  */

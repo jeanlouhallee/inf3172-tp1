@@ -6,7 +6,7 @@
  * Auteurs : Etienne Bergeron BERE08089101
  *           Jean-Lou Hallee  HALJ05129309
  *
- * Dernières modifications : 12 mars 2017
+ * Dernières modifications : 19 mars 2017
  */
 
 #include <stdio.h>
