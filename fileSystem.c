@@ -113,6 +113,10 @@ void creerRepertoireRacine(FILE *repertoires){
     fseek(repertoires, 0, SEEK_END);
     if(ftell(repertoires) == 0){
         struct repertoire *r = malloc(sizeof(struct repertoire));
+        if(r == NULL){
+            perror("Erreur d'allocation de memoire : ");
+            exit(EXIT_FAILURE);
+        }
         strcpy(r->chemin, "/\0");
         fseek(repertoires, 0, SEEK_SET);
         fwrite(r, sizeof(struct repertoire), 1, repertoires);
@@ -187,6 +191,10 @@ void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], ch
     if(!fichierExiste(nom, inodes, NULL, &position)){
         if(repertoireParentExiste(nom, repertoires)){
             struct inode *i = calloc(1, sizeof(struct inode));
+            if(i == NULL){
+                perror("Erreur d'allocation de memoire : ");
+                exit(EXIT_FAILURE);
+            }
             char ** fragments = fragmenterContenu(contenu, i);
             strcpy(i->nom, nom);
             ecritureFichier(disque, inodes, fragments, i, tab);
@@ -208,12 +216,21 @@ void creationFicher(FILE *disque, FILE *repertoires, FILE *inodes, int tab[], ch
 
 
 void suppressionFichier(FILE *disque, FILE *inodes, int tab[], char *nom){
-    struct inode *inode = malloc(sizeof(struct inode));
     int position = 0;
 
+    struct inode *inode = malloc(sizeof(struct inode));
+    if(inode == NULL){
+        perror("Erreur d'allocation de memoire : ");
+        exit(EXIT_FAILURE);
+    }
+
     if(fichierExiste(nom, inodes, inode, &position)){
-        libererBlocs(tab, inode);
         struct inode *inodeVide = malloc(sizeof(struct inode));
+        if(inodeVide == NULL){
+            perror("Erreur d'allocation de memoire : ");
+            exit(EXIT_FAILURE);
+        }
+        libererBlocs(tab, inode);
         memset(inodeVide->nom, '\0', MAX_CHEMIN + 1);
         fseek(inodes, (position  - 1) * sizeof(struct inode), SEEK_SET);
         fwrite(inodeVide, sizeof(struct inode), 1, inodes);
@@ -232,6 +249,10 @@ void creationRepertoire(FILE *repertoires, char *chemin){
     if(repertoireParentExiste(chemin, repertoires)){
         if(!repertoireExiste(chemin, repertoires, &position)){
             struct repertoire *r = malloc(sizeof(struct repertoire));
+            if(r == NULL){
+                perror("Erreur d'allocation de memoire : ");
+                exit(EXIT_FAILURE);
+            }
             strcpy(r->chemin, chemin);
             fseek(repertoires, 0, SEEK_END);
             fwrite(r, sizeof(struct repertoire), 1, repertoires);
@@ -251,6 +272,10 @@ void suppressionRepertoire(FILE *repertoires, FILE *inodes, FILE *disque, int ta
 
     if(repertoireExiste(chemin, repertoires, &position)){
         struct repertoire *r = malloc(sizeof(struct repertoire));
+        if(r == NULL){
+            perror("Erreur d'allocation de memoire : ");
+            exit(EXIT_FAILURE);
+        }
         memset(r->chemin, '\0', MAX_CHEMIN + 1);
         fseek(repertoires, (position - 1) * sizeof(struct repertoire), SEEK_SET);
         fwrite(r, sizeof(struct repertoire), 1, repertoires);
@@ -291,13 +316,22 @@ void suppressionContenu(FILE *repertoires, FILE *inodes, FILE *disque, int tab[]
     return;
 }
 
-void lireFichier(FILE *repertoires, FILE *inodes, FILE *disque, char *nom){
-    struct inode *inode = calloc(1, sizeof(struct inode));
+void lireFichier(FILE *repertoires, FILE *inodes, FILE *disque, char *nom){    
     int position = 0;
+
+    struct inode *inode = calloc(1, sizeof(struct inode));
+    if(inode == NULL){
+        perror("Erreur d'allocation de memoire : ");
+        exit(EXIT_FAILURE);
+    }
 
     if(fichierExiste(nom, inodes, inode, &position)){
         for(int i = 0; i < inode->nbFragments; ++i){
             struct bloc *fragment = calloc(1, sizeof(struct bloc));
+            if(fragment == NULL){
+                perror("Erreur d'allocation de memoire : ");
+                exit(EXIT_FAILURE);
+            }
             if(i < NB_BLOCS){
                 fseek(disque, inode->blocs[i] * NB_OCTETS, SEEK_SET);
                 fread(fragment, sizeof(struct bloc), 1, disque);
@@ -392,6 +426,10 @@ void ecritureFichier(FILE *disque, FILE *inodes, char **fragments, struct inode 
     fseek(disque, 0, SEEK_SET);
     for(int i = 0; i < inode->nbFragments; ++i){
         struct bloc *fragment = calloc(1, sizeof(struct bloc));
+        if(fragment == NULL){
+            perror("Erreur d'allocation de memoire : ");
+            exit(EXIT_FAILURE);
+        }
         strcpy(fragment->contenu, fragments[i]);
         if(i < NB_BLOCS){
             inode->blocs[i] = prochainBlocLibre(tab);
@@ -418,9 +456,17 @@ char ** fragmenterContenu(const char *contenu, struct inode *inode){
 
     char **fragments;
     fragments = calloc(nbFragments, sizeof(char*));
+    if(fragments == NULL){
+        perror("Erreur d'allocation de memoire : ");
+        exit(EXIT_FAILURE);
+    }
 
     for(int i = 0; i < nbFragments; ++i){
         fragments[i] = calloc(NB_OCTETS, sizeof(char));
+        if(&fragments[i] == NULL){
+            perror("Erreur d'allocation de memoire : ");
+            exit(EXIT_FAILURE);
+        }
         if(i == nbFragments - 1){
             memcpy(fragments[i], contenu + ((NB_OCTETS) * i), reste);
             strcpy(&fragments[i][reste], "\0");;
