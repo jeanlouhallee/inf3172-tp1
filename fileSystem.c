@@ -363,6 +363,7 @@ void lireFichier(FILE *repertoires, FILE *inodes, FILE *disque, char *nom){
             }
             free(fragment);
         }
+        printf("\n");
     } else {
         fprintf(stderr, "Le fichier n'existe pas.\n");
     }
