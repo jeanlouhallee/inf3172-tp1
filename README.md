@@ -33,10 +33,10 @@ Les opérations possibles sont :
 * Makefile : Fichier générant la compilation à l'aide de la commande "make" et nettoyage des fichiers non désirés à l'aide de la commande "make clean".
 * README.md : Fichier décrivant la totalité du projet.
 
-# Références
+## Références
 
 * [Stack Overflow - How to define and work with an array of bits in C?](http://stackoverflow.com/questions/2525310/how-to-define-and-work-with-an-array-of-bits-in-c) : Utilisé comme référence pour manipuler une table de bits.
 
-# Statut
+## Statut
 
 Projet complété : aucun bogue reconnu pour l'instant.
